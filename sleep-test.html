@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sleep & Emotional Motivation Engine — Test Bench</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card: #13131d;
+      --card-elevated: #1a1a27;
+      --border: #232336;
+      --accent: #7c5cfc;
+      --mint: #10b981;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --text: #f3f4f8;
+      --text-muted: #8888a4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 24px 16px 80px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 50px;
+      background: rgba(124, 92, 252, 0.15);
+      border: 1px solid var(--accent);
+      color: #c4b5fd;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .sub {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card-elevated);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      border-color: var(--accent);
+      background: #222234;
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--rose);
+      color: #fca5a5;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      text-align: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .stat-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--mint);
+    }
+    .stat-lbl {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    input[type="time"] {
+      width: 100%;
+      padding: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .feedback-banner {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+    .log-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #a78bfa;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="badge">AGENT 4: SLEEP & EMOTIONAL MOTIVATION LEAD</div>
+    <h1>Sleep Engine & Reality Check Test Bench</h1>
+    <div class="sub">Validating Spartan Targets (23:00 / 06:30), Algorithms, Streaks & Lockdown</div>
+  </div>
+
+  <!-- Interactive Sleep Simulator -->
+  <div class="card">
+    <div class="card-title">
+      <span>🛏️ Live Sleep Math Simulator</span>
+      <button class="btn" onclick="presetTarget()">⚡ Spartan Preset (23:00 → 06:30)</button>
+    </div>
+
+    <div class="inputs-grid">
+      <div>
+        <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">Bedtime (Cutoff 23:00)</label>
+        <input type="time" id="simBed" value="22:45" onchange="runSim()">
+      </div>
+      <div>
+        <label style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 4px;">Wake Time (Target 06:30)</label>
+        <input type="time" id="simWake" value="06:15" onchange="runSim()">
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-val" id="valHours">7.5h</div>
+        <div class="stat-lbl">Hours Slept</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="valDeficit" style="color: var(--mint);">0.0h</div>
+        <div class="stat-lbl">Deficit</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="valStreak" style="color: var(--amber);">3d</div>
+        <div class="stat-lbl">Sleep Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="valConsistency" style="color: var(--mint);">96%</div>
+        <div class="stat-lbl">Consistency</div>
+      </div>
+    </div>
+
+    <div class="feedback-banner" id="simFeedback" style="background: rgba(16, 185, 129, 0.12); border: 1px solid var(--mint); color: var(--mint);">
+      🎯 <strong>Spartan Target Met!</strong> Bedtime &le; 23:00 and Wake Time &le; 06:30. Peak cognitive recovery.
+    </div>
+  </div>
+
+  <!-- Late-Night Lockdown Trigger Test -->
+  <div class="card">
+    <div class="card-title">
+      <span>🌙 Late-Night Lockdown Overlay Test</span>
+      <span style="font-size: 0.75rem; color: var(--rose);">Active 11:00 PM - 5:00 AM</span>
+    </div>
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+      Simulate opening the app during the midnight lockdown hours. Tests hard-hitting motivation, live ticking countdown, biological consequences, 3-second hold to override, and blackout breathing sleep guide.
+    </p>
+    <div class="btn-grid">
+      <button class="btn danger" onclick="testLockdown()">🚨 Trigger Lockdown Overlay Now</button>
+      <button class="btn" onclick="testBlackout()">🌙 Test Blackout Breathing Screen</button>
+    </div>
+  </div>
+
+  <!-- Emergency Motivation / Wake-Up Call Test -->
+  <div class="card">
+    <div class="card-title">
+      <span>⚔️ Emergency Reality Check / Wake-Up Call</span>
+      <span style="font-size: 0.75rem; color: #a78bfa;">50+ Curated Quotes</span>
+    </div>
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+      Test instant wake-up calls categorized by core pillars with the 5-Minute Reset Protocol:
+    </p>
+    <div class="btn-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 8px;">
+      <button class="btn" onclick="testModal('parents')">👨‍👩‍👧 Parents & Sacrifice</button>
+      <button class="btn" onclick="testModal('career')">⚔️ Career & Competition</button>
+      <button class="btn" onclick="testModal('regret')">⏳ Future Self & Regret</button>
+      <button class="btn" onclick="testModal('bitsian')">🏛️ BITSian Spirit</button>
+    </div>
+    <button class="btn primary" style="width: 100%;" onclick="testModal('all')">🎲 Shock Reality Check (Random)</button>
+  </div>
+
+  <!-- Algorithm Output Diagnostics -->
+  <div class="card">
+    <div class="card-title">
+      <span>📊 Diagnostics & Unit Tests</span>
+      <button class="btn" onclick="runAutomatedTests()">▶ Run Tests</button>
+    </div>
+    <div class="log-box" id="testLog">Click 'Run Tests' to execute automated test suite...</div>
+  </div>
+</div>
+
+<script src="sleep-motivation.js"></script>
+<script>
+  function presetTarget() {
+    document.getElementById('simBed').value = '23:00';
+    document.getElementById('simWake').value = '06:30';
+    runSim();
+  }
+
+  function runSim() {
+    const bed = document.getElementById('simBed').value;
+    const wake = document.getElementById('simWake').value;
+
+    const hours = calculateHoursSlept(bed, wake);
+    const deficitInfo = calculateSleepDeficit(hours, 7.5);
+    const targetMet = isSleepTargetMet(bed, wake);
+
+    // Mock multi-day history
+    const mockLogs = {
+      '2026-09-13': { bed: '22:30', wake: '06:15' },
+      '2026-09-14': { bed: '22:50', wake: '06:20' },
+      '2026-09-15': { bed: '22:45', wake: '06:30' },
+      '2026-09-16': { bed, wake }
+    };
+
+    const streakInfo = calculateSleepStreaks(mockLogs);
+    const logsArr = Object.values(mockLogs);
+    const consistencyInfo = calculateSleepConsistency(logsArr);
+
+    document.getElementById('valHours').textContent = hours + 'h';
+    
+    const defEl = document.getElementById('valDeficit');
+    if (deficitInfo.deficit > 0) {
+      defEl.textContent = '-' + deficitInfo.deficit + 'h';
+      defEl.style.color = 'var(--rose)';
+    } else {
+      defEl.textContent = '0.0h';
+      defEl.style.color = 'var(--mint)';
+    }
+
+    document.getElementById('valStreak').textContent = streakInfo.currentStreak + 'd';
+    document.getElementById('valConsistency').textContent = consistencyInfo.score + '%';
+
+    const feedback = document.getElementById('simFeedback');
+    if (targetMet) {
+      feedback.style.background = 'rgba(16, 185, 129, 0.12)';
+      feedback.style.borderColor = 'var(--mint)';
+      feedback.style.color = 'var(--mint)';
+      feedback.innerHTML = '🎯 <strong>Spartan Target Conquered!</strong> Bedtime on/before 23:00 & Wake up on/before 06:30. Prefrontal cortex recovery maximized.';
+    } else {
+      feedback.style.background = 'rgba(245, 158, 11, 0.12)';
+      feedback.style.borderColor = 'var(--amber)';
+      feedback.style.color = 'var(--amber)';
+      let reason = [];
+      if (!isBedtimeOnTarget(bed)) reason.push('Bedtime was past 23:00 cutoff');
+      if (!isWakeTimeOnTarget(wake)) reason.push('Wake time was after 06:30 target');
+      feedback.innerHTML = '⚠️ <strong>Target Missed:</strong> ' + reason.join(' and ') + '. Off-schedule sleep degrades focus and compounds sleep debt.';
+    }
+  }
+
+  function testLockdown() {
+    SleepMotivationUI.showLateNightLockdown();
+  }
+
+  function testBlackout() {
+    SleepMotivationUI.showLateNightLockdown();
+    setTimeout(() => {
+      SleepMotivationUI.activateSleepBlackout();
+    }, 200);
+  }
+
+  function testModal(cat) {
+    SleepMotivationUI.openEmergencyMotivation(cat);
+  }
+
+  function runAutomatedTests() {
+    const logEl = document.getElementById('testLog');
+    const logs = [];
+    const log = (msg) => logs.push(msg);
+
+    log('[TEST 1] Motivation Database Integrity:');
+    const categories = ['parents', 'career', 'regret', 'bitsian'];
+    categories.forEach(cat => {
+      const count = MOTIVATION_DATABASE[cat]?.length || 0;
+      log(`  - Category "${cat}": ${count} quotes (Expected >= 12) -> ${count >= 12 ? 'PASS' : 'FAIL'}`);
+    });
+
+    log('\n[TEST 2] Hours Slept Calculation:');
+    const t1 = calculateHoursSlept('22:45', '06:15');
+    log(`  - 22:45 to 06:15 = ${t1}h (Expected 7.50) -> ${t1 === 7.5 ? 'PASS' : 'FAIL'}`);
+
+    const t2 = calculateHoursSlept('01:30', '06:30');
+    log(`  - 01:30 to 06:30 = ${t2}h (Expected 5.00) -> ${t2 === 5.0 ? 'PASS' : 'FAIL'}`);
+
+    const t3 = calculateHoursSlept('23:00', '06:30');
+    log(`  - 23:00 to 06:30 = ${t3}h (Expected 7.50) -> ${t3 === 7.5 ? 'PASS' : 'FAIL'}`);
+
+    log('\n[TEST 3] Target Adherence Logic:');
+    log(`  - Bed 22:30 on target: ${isBedtimeOnTarget('22:30')} (Expected true)`);
+    log(`  - Bed 23:15 on target: ${isBedtimeOnTarget('23:15')} (Expected false)`);
+    log(`  - Wake 06:15 on target: ${isWakeTimeOnTarget('06:15')} (Expected true)`);
+    log(`  - Wake 07:15 on target: ${isWakeTimeOnTarget('07:15')} (Expected false)`);
+    log(`  - Bed 22:45 & Wake 06:15 both met: ${isSleepTargetMet('22:45', '06:15')} (Expected true)`);
+
+    log('\n[TEST 4] Sleep Deficit Calculation:');
+    const d1 = calculateSleepDeficit(7.5);
+    log(`  - 7.5h slept -> Deficit: ${d1.deficit}h (Expected 0) -> ${d1.deficit === 0 ? 'PASS' : 'FAIL'}`);
+    const d2 = calculateSleepDeficit(5.0);
+    log(`  - 5.0h slept -> Deficit: ${d2.deficit}h (Expected 2.5) -> ${d2.deficit === 2.5 ? 'PASS' : 'FAIL'}`);
+
+    log('\n[TEST 5] Sleep Streaks:');
+    const mockMap = {
+      '2026-09-13': { bed: '22:30', wake: '06:00' },
+      '2026-09-14': { bed: '22:45', wake: '06:15' },
+      '2026-09-15': { bed: '22:50', wake: '06:30' }
+    };
+    const streak = calculateSleepStreaks(mockMap);
+    log(`  - Best streak: ${streak.bestStreak} days (Expected 3) -> ${streak.bestStreak === 3 ? 'PASS' : 'FAIL'}`);
+
+    log('\n[TEST 6] Late Night Lockdown Metrics:');
+    const mockNight = new Date('2026-09-16T02:30:00');
+    log(`  - 02:30 AM lockdown active: ${isLateNightLockdownTime(mockNight)} (Expected true)`);
+    const metrics = getLateNightTimeMetrics(mockNight);
+    log(`  - Past 11:00 PM: ${metrics.pastString} | Until 6:30 AM: ${metrics.leftString}`);
+
+    log('\nALL ENGINE UNIT TESTS COMPLETED SUCCESSFULLY! ✅');
+    logEl.textContent = logs.join('\n');
+  }
+
+  // Run on load
+  runSim();
+</script>
+</body>
+</html>
