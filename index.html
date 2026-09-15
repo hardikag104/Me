@@ -1,0 +1,2855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#09090d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Me">
+  <title>Me — Minimalist Life OS</title>
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <style>
+    /* ==========================================================================
+       THEME VARIABLES & MINIMALIST LUXURY DESIGN SYSTEM
+       ========================================================================== */
+    :root {
+      /* Backgrounds */
+      --bg-primary: #09090d;
+      --bg-surface: #12121a;
+      --bg-surface-elevated: #181824;
+      --bg-glass: rgba(18, 18, 26, 0.82);
+      --bg-header-glass: rgba(9, 9, 13, 0.88);
+
+      /* Backward compatibility for Agent 2, 3, 4 */
+      --bg: #09090d;
+      --card: #12121a;
+      --card-hover: #181824;
+      --text: #f3f4f8;
+      --text-dim: #9494a8;
+      --border: #1f1f2e;
+      --radius: 14px;
+
+      /* Borders */
+      --border-subtle: #1f1f2e;
+      --border-focus: #2f2f48;
+      --border-accent: #7c5cfc;
+
+      /* Accents */
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124, 92, 252, 0.35);
+      --accent-dim: rgba(124, 92, 252, 0.12);
+      --accent-hover: #8e71ff;
+
+      --mint: #10b981;
+      --green: #10b981;
+      --green-dim: rgba(16, 185, 129, 0.15);
+      --mint-glow: rgba(16, 185, 129, 0.35);
+
+      --amber: #f59e0b;
+      --yellow: #f59e0b;
+      --yellow-dim: rgba(245, 158, 11, 0.15);
+
+      --rose: #ef4444;
+      --red: #ef4444;
+      --red-dim: rgba(239, 68, 68, 0.15);
+
+      --cyan: #06b6d4;
+      --cyan-dim: rgba(6, 182, 212, 0.15);
+
+      /* Typography */
+      --text-primary: #f3f4f8;
+      --text-secondary: #9494a8;
+      --text-muted: #5e5e76;
+
+      /* Radii */
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      /* Layout */
+      --header-height: 60px;
+      --nav-height: 64px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --max-width: 620px;
+    }
+
+    /* Reset */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    /* App Shell Container */
+    #app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      position: relative;
+      background-color: var(--bg-primary);
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.85);
+    }
+
+    /* ==========================================================================
+       TOP STATUS BAR
+       ========================================================================== */
+    .top-status-bar {
+      height: var(--header-height);
+      min-height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      padding-top: var(--safe-top);
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 50;
+      position: relative;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--mint);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--mint);
+      animation: pulseDot 2.2s infinite ease-in-out;
+    }
+
+    .time-date-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .live-clock {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .live-date {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Metric Badges */
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .pill-badge.streak {
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--amber);
+      background: var(--yellow-dim);
+    }
+
+    .pill-badge.score {
+      border-color: rgba(16, 185, 129, 0.35);
+      color: var(--mint);
+      background: var(--green-dim);
+    }
+
+    /* Action Buttons */
+    .action-icon-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .action-icon-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+    }
+
+    .btn-reality-call {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      padding: 5px 9px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reality-call:hover {
+      background: var(--rose);
+      color: #fff;
+    }
+
+    .pwa-install-header-btn {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: #c4b5fd;
+      padding: 4px 9px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pwa-install-header-btn.visible {
+      display: inline-flex;
+    }
+    .pwa-install-header-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       SYSTEM NOTIFICATION BANNERS
+       ========================================================================== */
+    .system-banner {
+      display: none;
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideDown 0.25s ease;
+      z-index: 45;
+    }
+
+    .system-banner.offline {
+      background: rgba(245, 158, 11, 0.15);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--amber);
+    }
+
+    .system-banner.install-pwa {
+      background: rgba(124, 92, 252, 0.16);
+      border-bottom: 1px solid rgba(124, 92, 252, 0.35);
+      color: #d8b4fe;
+    }
+
+    .system-banner.show {
+      display: flex;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .banner-btn {
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .banner-btn.solid {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       SCROLLABLE APP MAIN AREA
+       ========================================================================== */
+    #app-main-viewport {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 16px calc(var(--nav-height) + var(--safe-bottom) + 24px);
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    #app-main-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    #app-main-viewport::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #app-main-viewport::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 4px;
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tab-pane.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      animation: tabFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Standard Cards */
+    .ui-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .ui-card:hover {
+      border-color: var(--border-focus);
+    }
+
+    .ui-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .ui-card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-styled {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+    }
+    .btn-styled:hover {
+      background: var(--border-subtle);
+    }
+    .btn-styled.mint {
+      background: var(--mint);
+      color: #09090d;
+      font-weight: 700;
+    }
+    .btn-styled.mint:hover {
+      box-shadow: 0 0 10px var(--mint-glow);
+    }
+    .btn-styled.accent {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-styled.accent:hover {
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .btn-styled.ghost {
+      background: transparent;
+      border-color: var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-styled.ghost:hover {
+      border-color: var(--border-focus);
+      color: var(--text-primary);
+    }
+    .btn-styled.sm {
+      padding: 5px 9px;
+      font-size: 0.74rem;
+      border-radius: 6px;
+    }
+
+    /* ==========================================================================
+       TAB 1: TIMETABLE & BITS PILANI ENGINE
+       ========================================================================== */
+    .bits-day-selector {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .bits-day-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 2px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.74rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .bits-day-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent-hover);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .bits-day-btn.today {
+      border-color: var(--mint);
+    }
+
+    /* 75% Attendance Analytics Banner */
+    .attendance-analytics-card {
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .analytics-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .stat-micro-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .stat-micro-box .val {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .stat-micro-box .lbl {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .low-attendance-alert {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid var(--rose);
+      color: #fca5a5;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      margin-top: 10px;
+      align-items: center;
+      gap: 8px;
+    }
+    .low-attendance-alert.show {
+      display: flex;
+    }
+
+    /* Classes Timeline */
+    .class-item-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .class-item-card.is-now {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+    .class-item-card.present {
+      border-left: 4px solid var(--mint);
+    }
+    .class-item-card.absent {
+      border-left: 4px solid var(--rose);
+    }
+    .class-item-card.cancelled {
+      border-left: 4px solid var(--amber);
+      opacity: 0.7;
+    }
+
+    .class-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .class-course-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .class-icon {
+      font-size: 1.3rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .class-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .class-sub {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .class-badge-type {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    /* Attendance Buttons Strip */
+    .att-btn-strip {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .att-btn {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .att-btn.present.active {
+      background: var(--mint);
+      border-color: var(--mint);
+      color: #09090d;
+      box-shadow: 0 0 8px var(--mint-glow);
+    }
+    .att-btn.absent.active {
+      background: var(--rose);
+      border-color: var(--rose);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+    .att-btn.cancelled.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #09090d;
+    }
+
+    /* Note Input row */
+    .class-note-row {
+      display: flex;
+      gap: 6px;
+    }
+    .class-note-input {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .class-note-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       TAB 2: TASKS & HABIT ENGINE (AGENT 2 INTEGRATION)
+       ========================================================================== */
+    .discipline-overview-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .habit-row-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .habit-row-item:hover {
+      border-color: var(--border-focus);
+      background: var(--bg-surface-elevated);
+    }
+    .habit-row-item.done {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .habit-check-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .habit-row-item.done .habit-check-circle {
+      background: var(--mint);
+      border-color: var(--mint);
+      color: #09090d;
+      box-shadow: 0 0 8px var(--mint-glow);
+    }
+
+    /* To-do List */
+    .todo-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .todo-input-row input {
+      flex: 1;
+      padding: 9px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-primary);
+      outline: none;
+    }
+    .todo-input-row select {
+      width: 110px;
+      padding: 9px 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .todo-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+    .todo-entry.completed {
+      opacity: 0.55;
+    }
+    .todo-entry.completed .todo-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .dot-pri {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pri-urgent { background: #ec4899; }
+    .pri-high { background: var(--rose); }
+    .pri-med, .pri-medium { background: var(--amber); }
+    .pri-low { background: var(--mint); }
+
+    /* Scratchpad ("Somebody Told Me") */
+    .scratchpad-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-top: 20px;
+    }
+    .scratch-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    /* ==========================================================================
+       TAB 3: FOOD & HEALTH (CONTAINER FOR AGENT 3)
+       ========================================================================== */
+    #foodHealthContainer {
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       TAB 4: SLEEP & EMOTIONAL MOTIVATION (AGENT 4 INTEGRATION)
+       ========================================================================== */
+    .sleep-hero-box {
+      background: linear-gradient(135deg, rgba(124, 92, 252, 0.15) 0%, rgba(9, 9, 13, 0.95) 100%);
+      border: 1px solid rgba(124, 92, 252, 0.35);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .sleep-hours-big {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      margin: 8px 0 4px;
+    }
+
+    .quality-stars-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin: 12px 0;
+    }
+    .star-btn {
+      flex: 1;
+      padding: 10px 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 1.15rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .star-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      box-shadow: 0 0 8px var(--accent-glow);
+      transform: scale(1.06);
+    }
+
+    /* ==========================================================================
+       BOTTOM NAVIGATION DOCK
+       ========================================================================== */
+    .bottom-nav-dock {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(var(--nav-height) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 50;
+    }
+
+    .nav-tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .nav-tab-btn .tab-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .nav-tab-btn .tab-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .nav-tab-btn .tab-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-top: 3px;
+    }
+
+    .nav-tab-btn.active {
+      color: var(--mint);
+    }
+    .nav-tab-btn.active .tab-icon {
+      transform: translateY(-2px);
+    }
+    .nav-tab-btn.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 32px;
+      height: 2px;
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint);
+      border-radius: 2px;
+    }
+
+    /* ==========================================================================
+       MODALS & OVERLAYS STYLING
+       ========================================================================== */
+    .app-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+    .app-modal-overlay.open {
+      display: flex;
+    }
+
+    .app-modal-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    /* Agent 4: Lockdown & Emergency Reality Modals */
+    .lockdown-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 8, 0.97);
+      backdrop-filter: blur(16px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .lockdown-overlay.show {
+      display: flex;
+    }
+    .lockdown-content {
+      width: 100%;
+      max-width: 480px;
+      background: #12121a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+    }
+    .lockdown-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 50px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--rose);
+      color: #fca5a5;
+      font-size: 0.72rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .lockdown-title {
+      font-size: 1.4rem;
+      color: #f3f4f8;
+      margin-bottom: 6px;
+    }
+    .lockdown-clock {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--amber);
+      margin-bottom: 16px;
+    }
+    .lockdown-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: #181824;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 6px;
+    }
+    .metric-card.danger { border-color: rgba(239, 68, 68, 0.4); color: var(--rose); }
+    .metric-card.warning { border-color: rgba(245, 158, 11, 0.4); color: var(--amber); }
+    .metric-val { font-size: 1.1rem; font-weight: 800; }
+    .metric-lbl { font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px; }
+
+    .lockdown-quote-box {
+      background: rgba(124, 92, 252, 0.08);
+      border: 1px solid rgba(124, 92, 252, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .quote-pillar {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--accent-hover);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .quote-body {
+      font-size: 0.95rem;
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .quote-meta { font-size: 0.75rem; color: var(--text-secondary); }
+    .quote-context { font-size: 0.75rem; color: #a78bfa; margin-top: 6px; }
+
+    .lockdown-impact {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .btn-lockdown-sleep {
+      width: 100%;
+      padding: 14px;
+      border-radius: 50px;
+      background: var(--mint);
+      border: none;
+      color: #09090d;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 12px;
+      box-shadow: 0 0 14px var(--mint-glow);
+    }
+    .override-container {
+      position: relative;
+      width: 100%;
+    }
+    .btn-lockdown-override {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .hold-progress-bar {
+      height: 4px;
+      background: var(--border-subtle);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .hold-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--rose);
+      transition: width 0.05s linear;
+    }
+
+    /* Emergency Wake-Up Call Reality Modal */
+    .emergency-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(12px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .emergency-modal.show { display: flex; }
+    .emergency-modal-dialog {
+      width: 100%;
+      max-width: 520px;
+      background: #12121a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 24px;
+      color: var(--text-primary);
+    }
+    .emergency-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .emergency-icon-tag {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--rose);
+      letter-spacing: 0.05em;
+    }
+    .emergency-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      margin-bottom: 14px;
+      padding-bottom: 4px;
+    }
+    .tab-btn {
+      padding: 6px 12px;
+      border-radius: 50px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: #c4b5fd;
+    }
+    .emergency-quote-card {
+      background: #181824;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .quote-category-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--accent-hover);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .quote-text-large {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      font-style: italic;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .quote-author-tag {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    .quote-context-highlight {
+      font-size: 0.78rem;
+      color: var(--amber);
+      margin-top: 8px;
+    }
+    .reset-protocol-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 0.78rem;
+    }
+    .protocol-header { font-weight: 800; color: var(--mint); margin-bottom: 6px; }
+    .protocol-list { padding-left: 18px; line-height: 1.6; }
+    .emergency-modal-footer {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-refresh-quote {
+      flex: 1;
+      padding: 10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+    .btn-im-locked-in {
+      flex: 2;
+      padding: 10px;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    /* Toast */
+    #global-toast {
+      position: fixed;
+      bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-focus);
+      color: var(--text-primary);
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 99999;
+    }
+    #global-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ========================================================================
+       TOP STATUS BAR
+       ======================================================================== -->
+  <header class="top-status-bar">
+    <div class="top-left">
+      <div class="brand-logo">
+        <span class="live-dot"></span>
+        <span>ME</span>
+      </div>
+      <div class="time-date-col">
+        <span class="live-clock" id="hdrLiveClock">--:--</span>
+        <span class="live-date" id="hdrLiveDate">---</span>
+      </div>
+    </div>
+
+    <div class="top-right">
+      <!-- Streak Badge -->
+      <div class="pill-badge streak" id="hdrStreakBadge" title="Daily Consistency Streak">
+        <span>🔥</span>
+        <span id="hdrStreakCount">0d</span>
+      </div>
+
+      <!-- Master Composite Score -->
+      <div class="pill-badge score" id="hdrScoreBadge" title="Master Daily Completion Score">
+        <span>🎯</span>
+        <span id="hdrScorePercent">0%</span>
+      </div>
+
+      <!-- Emergency Reality Call Button -->
+      <button class="btn-reality-call" id="btnTriggerReality" title="Instant Reality Check">
+        <span>🚨</span>
+        <span>Reality</span>
+      </button>
+
+      <!-- PWA Install Button (Dynamic) -->
+      <button class="pwa-install-header-btn" id="btnHeaderInstall" title="Install Me as Native App">
+        <span>📲</span>
+        <span>Install</span>
+      </button>
+
+      <!-- 1-Click Backup / Sync Engine -->
+      <button class="action-icon-btn" id="btnOpenBackupModal" title="1-Click PC ↔ Android Backup" aria-label="Backup and restore">
+        💾
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SYSTEM NOTIFICATION BANNERS
+       ======================================================================== -->
+  <div class="system-banner offline" id="bannerOffline">
+    <span>⚡ Offline Mode — All progress safely stored in local database</span>
+    <span style="opacity: 0.75; font-size: 0.7rem;">Local First</span>
+  </div>
+
+  <div class="system-banner install-pwa" id="bannerInstallPwa">
+    <span>📲 Install 'Me' for full-screen offline experience</span>
+    <div class="banner-actions">
+      <button class="banner-btn solid" id="btnPwaPromptInstall">Install</button>
+      <button class="banner-btn" id="btnPwaPromptDismiss">Later</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       SCROLLABLE MAIN APP CONTAINER (4 CORE TABS)
+       ======================================================================== -->
+  <main id="app-main-viewport">
+
+    <!-- ======================================================================
+         TAB 1: BITS PILANI TIMETABLE & ATTENDANCE ENGINE (AGENT 1)
+         ====================================================================== -->
+    <section id="tab-timetable" class="tab-pane active" role="tabpanel" aria-labelledby="nav-timetable">
+      <!-- Day Selector (Mon - Sun) -->
+      <div class="bits-day-selector" id="timetableDaySelector">
+        <button class="bits-day-btn" data-day="1"><span>Mon</span></button>
+        <button class="bits-day-btn" data-day="2"><span>Tue</span></button>
+        <button class="bits-day-btn" data-day="3"><span>Wed</span></button>
+        <button class="bits-day-btn" data-day="4"><span>Thu</span></button>
+        <button class="bits-day-btn" data-day="5"><span>Fri</span></button>
+        <button class="bits-day-btn" data-day="6"><span>Sat</span></button>
+        <button class="bits-day-btn" data-day="0"><span>Sun</span></button>
+      </div>
+
+      <!-- 75% Attendance Analytics Overview -->
+      <div class="attendance-analytics-card">
+        <div class="ui-card-header" style="margin-bottom: 4px;">
+          <div class="ui-card-title"><span class="icon">📊</span> 75% Attendance Guard</div>
+          <span style="font-size: 0.85rem; font-weight: 800; color: var(--mint);" id="overallAttPercent">100%</span>
+        </div>
+        <div class="analytics-stats-grid">
+          <div class="stat-micro-box">
+            <div class="val" id="statHeldClasses">0</div>
+            <div class="lbl">Classes Held</div>
+          </div>
+          <div class="stat-micro-box">
+            <div class="val" id="statAttendedClasses" style="color: var(--mint);">0</div>
+            <div class="lbl">Attended</div>
+          </div>
+          <div class="stat-micro-box">
+            <div class="val" id="statAbsentClasses" style="color: var(--rose);">0</div>
+            <div class="lbl">Missed</div>
+          </div>
+        </div>
+
+        <!-- Warning banner if any subject < 75% -->
+        <div class="low-attendance-alert" id="lowAttWarningBanner">
+          <span>⚠️</span>
+          <span id="lowAttWarningText">Attendance Warning: Keep above 75% to avoid grade penalty.</span>
+        </div>
+      </div>
+
+      <!-- Schedule List -->
+      <div class="ui-card-header">
+        <div class="ui-card-title" id="currentDayScheduleTitle">
+          <span class="icon">🏛️</span> BITS Pilani Classes
+        </div>
+        <span style="font-size: 0.74rem; color: var(--text-secondary);" id="scheduleCountText">0 classes</span>
+      </div>
+
+      <div id="timetableClassesList">
+        <!-- Classes rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         TAB 2: TASKS & HABIT ENGINE (AGENT 2)
+         ====================================================================== -->
+    <section id="tab-tasks" class="tab-pane" role="tabpanel" aria-labelledby="nav-tasks">
+      <!-- Discipline Overview -->
+      <div class="discipline-overview-card">
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800;">Daily Standards</h3>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Consistency beats talent every single day.</p>
+        </div>
+        <div class="pill-badge score" style="font-size: 0.95rem; padding: 8px 14px;" id="habitsScorePill">
+          0/9 Done
+        </div>
+      </div>
+
+      <!-- Core Habits List -->
+      <div class="ui-card-header">
+        <div class="ui-card-title"><span class="icon">✨</span> Core Habits & Chores</div>
+      </div>
+      <div id="habitsContainerList">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- Actionable Tasks with Categorization -->
+      <div class="ui-card-header" style="margin-top: 20px;">
+        <div class="ui-card-title"><span class="icon">🎯</span> Actionable Tasks</div>
+      </div>
+
+      <div class="todo-input-row">
+        <input type="text" id="inputNewTodo" placeholder="What needs doing?">
+        <select id="selectTodoCategory">
+          <option value="Daily chore">Chore</option>
+          <option value="Test/Exam">Test/Exam</option>
+          <option value="Meeting">Meeting</option>
+          <option value="Urgent">Urgent</option>
+        </select>
+        <button class="btn-styled accent" id="btnAddTodo">+</button>
+      </div>
+
+      <div id="todoListContainer">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- Scratchpad: "Somebody Told Me" Quick Capture -->
+      <div class="scratchpad-box">
+        <div class="ui-card-header" style="margin-bottom: 8px;">
+          <div class="ui-card-title"><span class="icon">👂</span> Somebody Told Me (Quick Capture)</div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <input type="text" id="inputScratchPerson" placeholder="Who told you? (e.g. Mom, Prof, Friend)" style="width: 140px; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 0.8rem;">
+          <input type="text" id="inputScratchText" placeholder="What did they say / assign?" style="flex: 1; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 0.8rem;">
+          <button class="btn-styled sm mint" id="btnAddScratchNote">Save</button>
+        </div>
+        <div id="scratchNotesList">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         TAB 3: FOOD & HEALTH INTELLIGENCE (AGENT 3)
+         ====================================================================== -->
+    <section id="tab-food" class="tab-pane" role="tabpanel" aria-labelledby="nav-food">
+      <div id="foodHealthContainer">
+        <!-- Agent 3's FoodHealthUIComponent mounts here -->
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         TAB 4: SLEEP & EMOTIONAL MOTIVATION (AGENT 4)
+         ====================================================================== -->
+    <section id="tab-sleep" class="tab-pane" role="tabpanel" aria-labelledby="nav-sleep">
+      <!-- Sleep Targets Hard Target Banner -->
+      <div class="ui-card" style="background: linear-gradient(135deg, rgba(124, 92, 252, 0.14) 0%, rgba(18, 18, 26, 0.9) 100%); border-color: rgba(124, 92, 252, 0.35); padding: 14px 16px; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-primary);">🎯 Spartan Sleep Targets</div>
+          <span style="font-size: 0.65rem; font-weight: 800; color: #bca8ff; background: var(--accent-dim); border: 1px solid rgba(124, 92, 252, 0.3); padding: 2px 8px; border-radius: 50px;">NON-NEGOTIABLE</span>
+        </div>
+        <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; gap: 4px;">
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">11:00 PM</div>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase;">🌙 Bedtime</div>
+          </div>
+          <div style="color: var(--text-muted); font-weight: 700;">→</div>
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">6:30 AM</div>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase;">⏰ Wake Up</div>
+          </div>
+          <div style="color: var(--text-muted); font-weight: 700;">=</div>
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 800; color: var(--mint);">7.5 hrs</div>
+            <div style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase;">🔋 Recovery</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleep Hero Summary with 4-metric Grid -->
+      <div class="sleep-hero-box">
+        <div class="ui-card-title" style="justify-content: center;"><span class="icon">😴</span> Today's Sleep & Recovery</div>
+        <div class="sleep-hours-big" id="displaySleepHours">0.0 <span style="font-size: 1.2rem; font-weight: 500; color: var(--text-secondary);">hrs</span></div>
+        <div class="pill-badge score" id="badgeSleepQuality">Target: 11:00 PM Bed · 6:30 AM Wake</div>
+
+        <!-- 4 Metrics: Deficit, Sleep Streak, Consistency, Debt -->
+        <div class="analytics-stats-grid" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+          <div class="stat-micro-box">
+            <div class="val" id="displaySleepDeficit">0.0h</div>
+            <div class="lbl">Deficit</div>
+          </div>
+          <div class="stat-micro-box">
+            <div class="val" id="displaySleepStreak" style="color: var(--amber);">0d</div>
+            <div class="lbl">Sleep Streak</div>
+          </div>
+          <div class="stat-micro-box">
+            <div class="val" id="displaySleepConsistency" style="color: var(--mint);">100%</div>
+            <div class="lbl">Consistency</div>
+          </div>
+          <div class="stat-micro-box">
+            <div class="val" id="displaySleepDebt">0.0h</div>
+            <div class="lbl">7-Day Debt</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleep Time Logger -->
+      <div class="ui-card">
+        <div class="ui-card-header" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="ui-card-title"><span class="icon">⏰</span> Sleep Log</div>
+          <button class="btn-reality-call" id="btnQuickSetSleepTarget" style="font-size: 0.72rem; padding: 4px 10px; background: var(--accent-dim); border: 1px solid var(--accent); color: #c4b5fd; cursor: pointer; border-radius: 6px;">⚡ Quick Target (23:00 → 06:30)</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+          <div>
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px;">Bedtime (Cutoff 11:00 PM)</label>
+            <input type="time" id="sleepBedInput" style="width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px;">Wake Up (Target 6:30 AM)</label>
+            <input type="time" id="sleepWakeInput" style="width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary);">
+          </div>
+        </div>
+
+        <div id="sleepTargetFeedbackBanner" style="display:none; padding: 10px 12px; border-radius: 8px; font-size: 0.78rem; margin-top: 10px; line-height: 1.45;"></div>
+
+        <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-top: 10px;">Recovery Quality</label>
+        <div class="quality-stars-row" id="sleepStarsRow">
+          <button class="star-btn" data-val="1" title="Exhausted">😫</button>
+          <button class="star-btn" data-val="2" title="Tired">🥱</button>
+          <button class="star-btn" data-val="3" title="Average">😐</button>
+          <button class="star-btn" data-val="4" title="Good">⚡</button>
+          <button class="star-btn" data-val="5" title="Peak Spartan">👑</button>
+        </div>
+      </div>
+
+      <!-- Evening Reflection & Gratitude -->
+      <div class="ui-card">
+        <div class="ui-card-title" style="margin-bottom: 8px;">
+          <span class="icon">📝</span> Evening Reflection & Discipline Wins
+        </div>
+        <textarea id="sleepJournalInput" style="width: 100%; min-height: 90px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); padding: 10px; font-family: inherit; font-size: 0.88rem; line-height: 1.5;" placeholder="What went well today? What will you conquer tomorrow? Name 3 things you are grateful for..."></textarea>
+        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 6px;" id="journalSavedFeedback">Auto-saved to storage</div>
+      </div>
+
+      <!-- Quick Reality Check Trigger in Sleep Tab -->
+      <div class="ui-card" style="text-align: center; border-color: rgba(239, 68, 68, 0.35); background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-surface) 100%);">
+        <div style="font-size: 1.6rem; margin-bottom: 4px;">🚨</div>
+        <div style="font-weight: 800; color: #fca5a5; font-size: 1rem; margin-bottom: 4px;">Emergency Reality Check / Wake-Up Call</div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px; max-width: 440px; margin-left: auto; margin-right: auto;">
+          Feeling distracted, lazy, or debating staying up late? Select a category for an instant high-voltage reset.
+        </p>
+
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
+          <button class="btn-reality-call" onclick="window.SleepMotivationUI.openEmergencyMotivation('parents')" style="font-size: 0.75rem; padding: 6px 12px; border-radius: 50px;">👨‍👩‍👧 Parents & Sacrifice</button>
+          <button class="btn-reality-call" onclick="window.SleepMotivationUI.openEmergencyMotivation('career')" style="font-size: 0.75rem; padding: 6px 12px; border-radius: 50px;">⚔️ Competition</button>
+          <button class="btn-reality-call" onclick="window.SleepMotivationUI.openEmergencyMotivation('regret')" style="font-size: 0.75rem; padding: 6px 12px; border-radius: 50px;">⏳ Future Regret</button>
+          <button class="btn-reality-call" onclick="window.SleepMotivationUI.openEmergencyMotivation('bitsian')" style="font-size: 0.75rem; padding: 6px 12px; border-radius: 50px;">🏛️ BITSian Ethos</button>
+        </div>
+
+        <button class="btn-styled accent" onclick="window.SleepMotivationUI.openEmergencyMotivation('all')" style="width: 100%; border-radius: 50px; padding: 10px; font-weight: 800; background: #ef4444; box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);">
+          ⚡ Shock Reset (Random Reality Check)
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       BOTTOM NAVIGATION DOCK
+       ======================================================================== -->
+  <nav class="bottom-nav-dock" id="bottomNavigationDock" role="tablist">
+    <button class="nav-tab-btn active" data-tab="timetable" id="nav-timetable" role="tab" aria-selected="true" aria-controls="tab-timetable">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </div>
+      <span class="tab-label">Timetable</span>
+    </button>
+
+    <button class="nav-tab-btn" data-tab="tasks" id="nav-tasks" role="tab" aria-selected="false" aria-controls="tab-tasks">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      </div>
+      <span class="tab-label">Tasks</span>
+    </button>
+
+    <button class="nav-tab-btn" data-tab="food" id="nav-food" role="tab" aria-selected="false" aria-controls="tab-food">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+      </div>
+      <span class="tab-label">Food</span>
+    </button>
+
+    <button class="nav-tab-btn" data-tab="sleep" id="nav-sleep" role="tab" aria-selected="false" aria-controls="tab-sleep">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </div>
+      <span class="tab-label">Sleep</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ==========================================================================
+     1-CLICK JSON BACKUP & DEVICE TRANSFER MODAL
+     ========================================================================== -->
+<div class="app-modal-overlay" id="backupSyncModal">
+  <div class="app-modal-card">
+    <div class="modal-head">
+      <h3 style="font-size: 1.15rem; font-weight: 800;">💾 Data Backup & Phone Transfer</h3>
+      <button style="background: transparent; border: none; font-size: 1.4rem; color: var(--text-secondary); cursor: pointer;" id="btnCloseBackupModal">&times;</button>
+    </div>
+
+    <div style="background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+      <div><strong>Storage Engine:</strong> Client-Side LocalStorage (Private & Offline)</div>
+      <div id="statStoredKeys">Stored Records: Calculating...</div>
+      <div id="statPayloadSize">Payload Size: Calculating...</div>
+      <div style="margin-top: 4px; color: var(--text-primary);">Transfer all your habits, BITS attendance, and logs between PC and Android in 1 click.</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+      <button class="btn-styled accent" id="btnExportJsonFile" style="padding: 12px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.3rem;">📥</span>
+        <span>Download JSON</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Save to Device</span>
+      </button>
+
+      <button class="btn-styled" id="btnTriggerImportFile" style="padding: 12px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.3rem;">📤</span>
+        <span>Import JSON</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Pick .json File</span>
+      </button>
+      <input type="file" id="backupFileInput" accept=".json,application/json" style="display: none;">
+
+      <button class="btn-styled ghost" id="btnCopyJsonToClipboard" style="padding: 12px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.3rem;">📋</span>
+        <span>Copy to Clipboard</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Paste in Notes/Chat</span>
+      </button>
+
+      <button class="btn-styled ghost" id="btnLoadDemoData" style="padding: 12px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.3rem;">⚡</span>
+        <span>Load Sample Data</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Demo BITS & Habits</span>
+      </button>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 10px;">
+      <button class="btn-styled ghost sm" style="flex: 1;" id="btnResetTodayProgress">↺ Reset Today</button>
+      <button class="btn-styled ghost sm" style="flex: 1; color: var(--rose);" id="btnHardWipeStorage">⚠️ Factory Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     GLOBAL TOAST FEEDBACK
+     ========================================================================== -->
+<div id="global-toast">
+  <span id="globalToastIcon">✓</span>
+  <span id="globalToastMsg">Changes saved</span>
+</div>
+
+<!-- ==========================================================================
+     SCRIPTS & AGENT GLUE ARCHITECTURE
+     ========================================================================== -->
+<!-- Agent 1: BITS Timetable Engine -->
+<script src="timetable.js"></script>
+
+<!-- Agent 2: Tasks, Chores & Habit Engine -->
+<script src="task-habit-engine.js"></script>
+
+<!-- Agent 4: Sleep & Emotional Motivation Engine -->
+<script src="sleep-motivation.js"></script>
+
+<!-- Master Glue & Component Integration -->
+<script type="module">
+  // Import Agent 3's Food & Health Intelligence Component
+  import { FoodHealthUIComponent, FoodHealthStorage, DailyHealthScoreEngine } from './food-health.js';
+
+  (function() {
+    'use strict';
+
+    const ACTIVE_TAB_KEY = 'me_active_tab';
+
+    const FALLBACK_HABITS = [
+      { id: 'sleep_early', icon: '🌙', name: 'Sleep Before 11 PM', desc: 'Spartan cutoff. No screens in bed' },
+      { id: 'wake_early', icon: '⏰', name: 'Wake Up at 6:30 AM', desc: 'Feet on the floor, zero snooze' },
+      { id: 'water_target', icon: '💧', name: 'Drink 2.5L Water', desc: 'Sustained cellular hydration & energy' },
+      { id: 'healthy_meal', icon: '🥗', name: 'Eat Whole Clean Food', desc: 'High protein, dense micronutrients' },
+      { id: 'no_junk', icon: '🚫', name: 'Zero Junk Food', desc: 'No processed snacks, chips or sugary sodas' },
+      { id: 'workout', icon: '💪', name: '30m Workout / Movement', desc: 'Lifting, running, or brisk walk' },
+      { id: 'deep_work', icon: '🎯', name: '2 Hours Deep Work', desc: 'Uninterrupted flow state on core projects' },
+      { id: 'no_doomscroll', icon: '📵', name: 'Zero Doomscrolling', desc: 'Protect attention & cognitive bandwidth' },
+      { id: 'learn', icon: '📚', name: 'Learn Something New', desc: 'Reading, technical whitepaper or skill' }
+    ];
+
+    function getTodayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function getStorage(key, fallback = null) {
+      try {
+        const val = localStorage.getItem(key);
+        return val !== null ? JSON.parse(val) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function setStorage(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (e) {
+        console.warn('Storage write error:', e);
+      }
+    }
+
+    // ========================================================================
+    // MASTER APP CONTROLLER & GLUE
+    // ========================================================================
+    const MeApp = {
+      selectedTimetableDay: new Date().getDay(), // 0=Sun, 1=Mon, ...
+      foodComponent: null,
+
+      init() {
+        this.setupLiveClock();
+        this.setupTabNavigation();
+        this.setupTimetable();
+        this.setupTasks();
+        this.setupFood();
+        this.setupSleep();
+        this.setupBackupEngine();
+        this.setupPwa();
+        this.calculateMasterScore();
+
+        // Initialize Agent 4's Late Night Lockdown Guard (11:00 PM - 5:00 AM)
+        if (window.SleepMotivationUI && typeof window.SleepMotivationUI.initLateNightCheck === 'function') {
+          window.SleepMotivationUI.initLateNightCheck();
+        }
+
+        // Reality Check Quick Button
+        document.getElementById('btnTriggerReality')?.addEventListener('click', () => {
+          if (window.SleepMotivationUI) {
+            window.SleepMotivationUI.openEmergencyMotivation('all');
+          }
+        });
+      },
+
+      // Global Toast
+      showToast(msg, icon = '✓') {
+        const toast = document.getElementById('global-toast');
+        const iconEl = document.getElementById('globalToastIcon');
+        const msgEl = document.getElementById('globalToastMsg');
+        if (!toast) return;
+
+        iconEl.textContent = icon;
+        msgEl.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2400);
+      },
+
+      // Clock & Date Ticker
+      setupLiveClock() {
+        const clockEl = document.getElementById('hdrLiveClock');
+        const dateEl = document.getElementById('hdrLiveDate');
+
+        const updateClock = () => {
+          const now = new Date();
+          if (clockEl) {
+            clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+          if (dateEl) {
+            dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          }
+        };
+
+        updateClock();
+        setInterval(updateClock, 1000);
+      },
+
+      // Tab Transitions
+      setupTabNavigation() {
+        const navBtns = document.querySelectorAll('.nav-tab-btn');
+        navBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            this.switchTab(tabId);
+          });
+        });
+
+        const savedTab = localStorage.getItem(ACTIVE_TAB_KEY) || 'timetable';
+        this.switchTab(savedTab);
+      },
+
+      switchTab(tabId) {
+        const tabs = document.querySelectorAll('.tab-pane');
+        const navBtns = document.querySelectorAll('.nav-tab-btn');
+
+        let target = document.getElementById(`tab-${tabId}`);
+        if (!target) {
+          tabId = 'timetable';
+          target = document.getElementById(`tab-${tabId}`);
+        }
+
+        tabs.forEach(t => t.classList.remove('active'));
+        navBtns.forEach(b => {
+          const isMatch = b.getAttribute('data-tab') === tabId;
+          b.classList.toggle('active', isMatch);
+          b.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        });
+
+        if (target) {
+          target.classList.add('active');
+          localStorage.setItem(ACTIVE_TAB_KEY, tabId);
+        }
+      },
+
+      // ======================================================================
+      // TAB 1: BITS PILANI TIMETABLE INTEGRATION (AGENT 1)
+      // ======================================================================
+      setupTimetable() {
+        const daySelector = document.getElementById('timetableDaySelector');
+        const dayBtns = daySelector?.querySelectorAll('.bits-day-btn');
+        const currentDayIndex = new Date().getDay();
+
+        dayBtns?.forEach(btn => {
+          const dayVal = parseInt(btn.getAttribute('data-day'), 10);
+          if (dayVal === currentDayIndex) {
+            btn.classList.add('today');
+          }
+
+          btn.onclick = () => {
+            this.selectedTimetableDay = dayVal;
+            dayBtns.forEach(b => b.classList.toggle('active', b === btn));
+            this.renderTimetableClasses();
+          };
+        });
+
+        // Set active day
+        const activeBtn = Array.from(dayBtns || []).find(b => parseInt(b.getAttribute('data-day'), 10) === this.selectedTimetableDay);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        this.renderTimetableClasses();
+        this.updateAttendanceAnalytics();
+      },
+
+      renderTimetableClasses() {
+        const container = document.getElementById('timetableClassesList');
+        const countText = document.getElementById('scheduleCountText');
+        const titleEl = document.getElementById('currentDayScheduleTitle');
+        if (!container || !window.BITS_TIMETABLE) return;
+
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (titleEl) {
+          titleEl.innerHTML = `<span class="icon">🏛️</span> ${dayNames[this.selectedTimetableDay]}'s Classes`;
+        }
+
+        const dailyData = window.BITS_TIMETABLE.getDailySchedule(this.selectedTimetableDay);
+        const classes = dailyData.classes || [];
+
+        if (countText) {
+          countText.textContent = `${classes.length} classes`;
+        }
+
+        if (classes.length === 0) {
+          container.innerHTML = `
+            <div class="ui-card" style="text-align: center; color: var(--text-secondary); padding: 30px 16px;">
+              <div style="font-size: 1.8rem; margin-bottom: 6px;">🎉</div>
+              <div style="font-weight: 700; color: var(--text-primary);">No scheduled classes on ${dayNames[this.selectedTimetableDay]}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Enjoy your free time, catch up on projects, and recover.</div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = classes.map(cls => {
+          const isNow = !!cls.isNow;
+          const status = cls.status || 'unmarked';
+          const note = cls.note || '';
+
+          return `
+            <div class="class-item-card ${status} ${isNow ? 'is-now' : ''}" data-id="${cls.id}">
+              <div class="class-card-top">
+                <div class="class-course-info">
+                  <div class="class-icon">${cls.icon || '📚'}</div>
+                  <div>
+                    <div class="class-title">
+                      ${cls.courseName}
+                      ${isNow ? '<span style="font-size: 0.65rem; background: var(--accent); color:#fff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 800;">LIVE NOW</span>' : ''}
+                    </div>
+                    <div class="class-sub">
+                      <span>⏰ ${cls.timeFormatted}</span>
+                      <span>·</span>
+                      <span>📍 ${cls.room || 'Room TBA'}</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="class-badge-type">${cls.type}</span>
+              </div>
+
+              <!-- Attendance Mark Action Strip -->
+              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+                <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700;">Attendance:</span>
+                <div class="att-btn-strip">
+                  <button class="att-btn present ${status === 'present' ? 'active' : ''}" onclick="window.MeAppGlue.markClass('${dailyData.date}', '${cls.id}', 'present')">✓ Present</button>
+                  <button class="att-btn absent ${status === 'absent' ? 'active' : ''}" onclick="window.MeAppGlue.markClass('${dailyData.date}', '${cls.id}', 'absent')">✗ Absent</button>
+                  <button class="att-btn cancelled ${status === 'cancelled' ? 'active' : ''}" onclick="window.MeAppGlue.markClass('${dailyData.date}', '${cls.id}', 'cancelled')">⊘ Cancelled</button>
+                </div>
+              </div>
+
+              <!-- Class Note -->
+              <div class="class-note-row">
+                <input type="text" class="class-note-input" placeholder="Quick class note or homework..." value="${escapeAttr(note)}" onchange="window.MeAppGlue.saveNote('${dailyData.date}', '${cls.id}', this.value)">
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      updateAttendanceAnalytics() {
+        if (!window.BITS_TIMETABLE) return;
+        const report = window.BITS_TIMETABLE.getAllSubjectsAttendance();
+        const overall = report.overall;
+
+        const percentEl = document.getElementById('overallAttPercent');
+        const heldEl = document.getElementById('statHeldClasses');
+        const attEl = document.getElementById('statAttendedClasses');
+        const absEl = document.getElementById('statAbsentClasses');
+        const warnBanner = document.getElementById('lowAttWarningBanner');
+        const warnText = document.getElementById('lowAttWarningText');
+
+        if (percentEl) percentEl.textContent = `${overall.overallPercentage}%`;
+        if (heldEl) heldEl.textContent = overall.totalHeld;
+        if (attEl) attEl.textContent = overall.totalAttended;
+        if (absEl) absEl.textContent = overall.totalAbsent;
+
+        if (overall.hasLowAttendance && warnBanner && warnText) {
+          warnBanner.classList.add('show');
+          const worst = report.lowAttendanceList[0];
+          warnText.textContent = `Warning: ${worst.courseName} is at ${worst.percentage}% (<75%). Must attend next ${worst.mustAttend} class(es)!`;
+        } else if (warnBanner) {
+          warnBanner.classList.remove('show');
+        }
+      },
+
+      // ======================================================================
+      // TAB 2: TASKS & HABIT ENGINE (AGENT 2 INTEGRATION)
+      // ======================================================================
+      setupTasks() {
+        this.renderHabits();
+        this.renderTodos();
+        this.renderScratchpad();
+
+        document.getElementById('btnAddTodo')?.addEventListener('click', () => this.addTodo());
+        document.getElementById('inputNewTodo')?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') this.addTodo();
+        });
+
+        document.getElementById('btnAddScratchNote')?.addEventListener('click', () => this.addScratchNote());
+      },
+
+      renderHabits() {
+        const container = document.getElementById('habitsContainerList');
+        if (!container) return;
+
+        const today = getTodayString();
+        let habits = [];
+        let completedCount = 0;
+
+        if (window.TaskHabitEngine) {
+          habits = window.TaskHabitEngine.habits.getHabitsForDate(today);
+          completedCount = habits.filter(h => h.isCompleted).length;
+
+          container.innerHTML = habits.map(h => {
+            return `
+              <div class="habit-row-item ${h.isCompleted ? 'done' : ''}" onclick="window.MeAppGlue.toggleHabit('${h.id}')">
+                <div style="font-size: 1.3rem; width: 34px; text-align: center;">${h.icon || '✨'}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 0.92rem;">${h.name}</div>
+                  <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">${h.description || ''}</div>
+                </div>
+                <div class="habit-check-circle">${h.isCompleted ? '✓' : ''}</div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          const habitsState = getStorage(`me_${today}_habits`, getStorage(`lt_${today}_habits`, {}));
+          habits = FALLBACK_HABITS;
+          completedCount = habits.filter(h => habitsState[h.id]).length;
+
+          container.innerHTML = habits.map(h => {
+            const isDone = !!habitsState[h.id];
+            return `
+              <div class="habit-row-item ${isDone ? 'done' : ''}" onclick="window.MeAppGlue.toggleHabit('${h.id}')">
+                <div style="font-size: 1.3rem; width: 34px; text-align: center;">${h.icon}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 0.92rem;">${h.name}</div>
+                  <div style="font-size: 0.73rem; color: var(--text-secondary); margin-top: 1px;">${h.desc}</div>
+                </div>
+                <div class="habit-check-circle">${isDone ? '✓' : ''}</div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        const pill = document.getElementById('habitsScorePill');
+        if (pill) pill.textContent = `${completedCount}/${habits.length} Done`;
+      },
+
+      toggleHabit(habitId) {
+        const today = getTodayString();
+        if (window.TaskHabitEngine) {
+          const habit = window.TaskHabitEngine.habits.getHabitById(habitId);
+          const currentVal = window.TaskHabitEngine.habits.getHabitProgress(habitId, today);
+          const newVal = currentVal > 0 ? 0 : 1;
+          window.TaskHabitEngine.habits.logCompletion(habitId, today, newVal);
+          this.renderHabits();
+          this.calculateMasterScore();
+          this.showToast(newVal > 0 ? 'Standard achieved!' : 'Standard unchecked');
+        } else {
+          const key = `me_${today}_habits`;
+          const state = getStorage(key, getStorage(`lt_${today}_habits`, {}));
+          state[habitId] = !state[habitId];
+          setStorage(key, state);
+          setStorage(`lt_${today}_habits`, state);
+          this.renderHabits();
+          this.calculateMasterScore();
+          this.showToast(state[habitId] ? 'Standard achieved!' : 'Standard unchecked');
+        }
+      },
+
+      renderTodos() {
+        const container = document.getElementById('todoListContainer');
+        if (!container) return;
+
+        let todos = [];
+        if (window.TaskHabitEngine) {
+          todos = window.TaskHabitEngine.todos.getAll();
+        } else {
+          const today = getTodayString();
+          todos = getStorage(`me_${today}_todos`, [
+            { id: 'td_1', title: 'Review Machine Elements problem set', category: 'Daily chore', priority: 'high', completed: false }
+          ]);
+        }
+
+        if (todos.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 20px 0;">
+              No pending tasks. Add one above!
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = todos.map(t => {
+          const isDone = !!(t.completed || t.done);
+          const title = t.title || t.text;
+          const pri = t.priority || t.pri || 'med';
+          const cat = t.category || 'Chore';
+
+          return `
+            <div class="todo-entry ${isDone ? 'completed' : ''}">
+              <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                <button class="habit-check-circle" style="width: 24px; height: 24px; cursor: pointer; ${isDone ? 'background: var(--mint); border-color: var(--mint); color: #000;' : ''}" onclick="window.MeAppGlue.toggleTodo('${t.id}')">${isDone ? '✓' : ''}</button>
+                <span class="dot-pri pri-${pri}"></span>
+                <span class="todo-text" style="font-size: 0.88rem; font-weight: 500;">${escapeHtml(title)}</span>
+                <span style="font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--bg-surface-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle);">${cat}</span>
+              </div>
+              <button style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;" onclick="window.MeAppGlue.deleteTodo('${t.id}')">✕</button>
+            </div>
+          `;
+        }).join('');
+      },
+
+      addTodo() {
+        const input = document.getElementById('inputNewTodo');
+        const catSelect = document.getElementById('selectTodoCategory');
+        const text = input.value.trim();
+        if (!text) return;
+
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.todos.addTask({
+            title: text,
+            category: catSelect.value,
+            dueDate: getTodayString(),
+            priority: catSelect.value === 'Urgent' ? 'urgent' : (catSelect.value === 'Test/Exam' ? 'high' : 'medium')
+          });
+        } else {
+          const today = getTodayString();
+          const key = `me_${today}_todos`;
+          const todos = getStorage(key, []);
+          todos.push({
+            id: `todo_${Date.now()}`,
+            title: text,
+            category: catSelect.value,
+            pri: catSelect.value === 'Urgent' ? 'high' : 'med',
+            completed: false
+          });
+          setStorage(key, todos);
+        }
+
+        input.value = '';
+        this.renderTodos();
+        this.calculateMasterScore();
+        this.showToast('Task added');
+      },
+
+      toggleTodo(id) {
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.todos.toggleTask(id);
+        } else {
+          const today = getTodayString();
+          const key = `me_${today}_todos`;
+          const todos = getStorage(key, []);
+          const item = todos.find(t => t.id === id);
+          if (item) {
+            item.completed = !item.completed;
+            setStorage(key, todos);
+          }
+        }
+        this.renderTodos();
+        this.calculateMasterScore();
+      },
+
+      deleteTodo(id) {
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.todos.deleteTask(id);
+        } else {
+          const today = getTodayString();
+          const key = `me_${today}_todos`;
+          let todos = getStorage(key, []);
+          todos = todos.filter(t => t.id !== id);
+          setStorage(key, todos);
+        }
+        this.renderTodos();
+        this.calculateMasterScore();
+      },
+
+      renderScratchpad() {
+        const list = document.getElementById('scratchNotesList');
+        if (!list) return;
+
+        if (!window.TaskHabitEngine) {
+          list.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted);">Quick scratchpad available when TaskEngine loads.</div>`;
+          return;
+        }
+
+        const notes = window.TaskHabitEngine.scratchpad.getAll();
+        if (notes.length === 0) {
+          list.innerHTML = `<div style="font-size:0.72rem; color:var(--text-muted); padding: 4px 0;">No scratchpad notes yet. Log quick reminders from parents or professors above!</div>`;
+          return;
+        }
+
+        list.innerHTML = notes.slice(0, 5).map(n => `
+          <div class="scratch-item">
+            <div style="flex: 1;">
+              <strong>${escapeHtml(n.person)}:</strong> ${escapeHtml(n.text)}
+            </div>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn-styled sm ghost" style="padding: 2px 6px; font-size: 0.65rem;" onclick="window.MeAppGlue.convertScratchToTask('${n.id}')">Convert to Task</button>
+              <button style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;" onclick="window.MeAppGlue.deleteScratchNote('${n.id}')">✕</button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      addScratchNote() {
+        const personInput = document.getElementById('inputScratchPerson');
+        const textInput = document.getElementById('inputScratchText');
+        const person = personInput.value.trim() || 'Someone';
+        const text = textInput.value.trim();
+        if (!text) return;
+
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.scratchpad.addNote({ person, text });
+          personInput.value = '';
+          textInput.value = '';
+          this.renderScratchpad();
+          this.showToast('Note captured!');
+        }
+      },
+
+      // ======================================================================
+      // TAB 3: FOOD & HEALTH (AGENT 3 INTEGRATION)
+      // ======================================================================
+      setupFood() {
+        try {
+          const container = document.getElementById('foodHealthContainer');
+          if (container && FoodHealthUIComponent) {
+            this.foodComponent = new FoodHealthUIComponent(container);
+            this.foodComponent.init();
+          }
+        } catch (err) {
+          console.warn('FoodHealthUIComponent initialization:', err);
+        }
+      },
+
+      // ======================================================================
+      // TAB 4: SLEEP & EMOTIONAL MOTIVATION (AGENT 4 INTEGRATION)
+      // ======================================================================
+      setupSleep() {
+        const bedInput = document.getElementById('sleepBedInput');
+        const wakeInput = document.getElementById('sleepWakeInput');
+        const starsRow = document.getElementById('sleepStarsRow');
+        const journalInput = document.getElementById('sleepJournalInput');
+        const today = getTodayString();
+
+        const sleepState = getStorage(`me_${today}_sleep`, getStorage(`lt_${today}_sleep`, {}));
+
+        if (sleepState.bed && bedInput) bedInput.value = sleepState.bed;
+        if (sleepState.wake && wakeInput) wakeInput.value = sleepState.wake;
+        if (sleepState.quality && starsRow) {
+          starsRow.querySelectorAll('.star-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-val') === String(sleepState.quality));
+          });
+        }
+
+        const journalText = getStorage(`me_${today}_journal`, getStorage(`lt_${today}_journal`, ''));
+        if (journalInput) journalInput.value = journalText;
+
+        this.updateSleepDisplay(sleepState.bed, sleepState.wake);
+
+        bedInput?.addEventListener('change', () => this.saveSleepData());
+        wakeInput?.addEventListener('change', () => this.saveSleepData());
+
+        // Quick set hard targets button (11:00 PM -> 6:30 AM)
+        document.getElementById('btnQuickSetSleepTarget')?.addEventListener('click', () => {
+          if (bedInput) bedInput.value = '23:00';
+          if (wakeInput) wakeInput.value = '06:30';
+          this.saveSleepData();
+          this.showToast('Spartan Targets set: 23:00 → 06:30 (7.5h)');
+        });
+
+        starsRow?.querySelectorAll('.star-btn').forEach(btn => {
+          btn.onclick = () => {
+            const val = btn.getAttribute('data-val');
+            starsRow.querySelectorAll('.star-btn').forEach(b => b.classList.toggle('active', b === btn));
+            const cur = getStorage(`me_${today}_sleep`, {});
+            cur.quality = val;
+            setStorage(`me_${today}_sleep`, cur);
+            this.showToast('Rating logged');
+          };
+        });
+
+        journalInput?.addEventListener('input', () => {
+          clearTimeout(this._journalTimer);
+          const feedback = document.getElementById('journalSavedFeedback');
+          if (feedback) feedback.textContent = 'Saving reflection...';
+
+          this._journalTimer = setTimeout(() => {
+            const val = journalInput.value;
+            setStorage(`me_${today}_journal`, val);
+            setStorage(`lt_${today}_journal`, val);
+            if (feedback) feedback.textContent = 'Auto-saved to storage';
+          }, 600);
+        });
+      },
+
+      saveSleepData() {
+        const bed = document.getElementById('sleepBedInput')?.value;
+        const wake = document.getElementById('sleepWakeInput')?.value;
+        const today = getTodayString();
+
+        const sleepState = getStorage(`me_${today}_sleep`, {});
+        sleepState.bed = bed;
+        sleepState.wake = wake;
+
+        setStorage(`me_${today}_sleep`, sleepState);
+        setStorage(`lt_${today}_sleep`, sleepState);
+
+        this.updateSleepDisplay(bed, wake);
+        this.calculateMasterScore();
+        this.showToast('Sleep logged');
+      },
+
+      updateSleepDisplay(bed, wake) {
+        const displayEl = document.getElementById('displaySleepHours');
+        const badgeEl = document.getElementById('badgeSleepQuality');
+        const defEl = document.getElementById('displaySleepDeficit');
+        const streakEl = document.getElementById('displaySleepStreak');
+        const consEl = document.getElementById('displaySleepConsistency');
+        const debtEl = document.getElementById('displaySleepDebt');
+        const bannerEl = document.getElementById('sleepTargetFeedbackBanner');
+        const today = getTodayString();
+
+        // 1. Gather all historical sleep logs from storage
+        const allSleepRecords = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('me_') || k.startsWith('lt_')) && k.endsWith('_sleep')) {
+            const d = k.replace(/^(me_|lt_)/, '').replace(/_sleep$/, '');
+            if (d && /^\d{4}-\d{2}-\d{2}$/.test(d) && !allSleepRecords[d]) {
+              try { allSleepRecords[d] = JSON.parse(localStorage.getItem(k)); } catch (e) {}
+            }
+          }
+        }
+
+        if (!bed || !wake) {
+          if (displayEl) displayEl.innerHTML = `0.0 <span style="font-size: 1.2rem; font-weight: 500; color: var(--text-secondary);">hrs</span>`;
+          if (badgeEl) badgeEl.textContent = 'Target: 11:00 PM Bed · 6:30 AM Wake';
+          if (defEl) defEl.textContent = '0.0h';
+          if (bannerEl) bannerEl.style.display = 'none';
+
+          // Still calculate historical streak and consistency
+          const streakInfo = window.calculateSleepStreaks ? window.calculateSleepStreaks(allSleepRecords) : { currentStreak: 0, bestStreak: 0 };
+          const logsArr = Object.keys(allSleepRecords).sort().map(d => allSleepRecords[d]);
+          const consistencyInfo = window.calculateSleepConsistency ? window.calculateSleepConsistency(logsArr) : { score: 100, cumulativeDebt: 0 };
+
+          if (streakEl) streakEl.textContent = `${streakInfo.currentStreak}d`;
+          if (consEl) consEl.textContent = `${consistencyInfo.score}%`;
+          if (debtEl) debtEl.textContent = `${consistencyInfo.cumulativeDebt}h`;
+          return;
+        }
+
+        // Calculate hours and deficit
+        const hours = window.calculateHoursSlept ? window.calculateHoursSlept(bed, wake) : 0;
+        const deficitInfo = window.calculateSleepDeficit ? window.calculateSleepDeficit(hours, 7.5) : { deficit: 0, surplus: 0 };
+        const isTargetMet = window.isSleepTargetMet ? window.isSleepTargetMet(bed, wake) : false;
+
+        allSleepRecords[today] = { bed, wake, hours, targetMet: isTargetMet };
+
+        // Streaks & Consistency across all days
+        const streakInfo = window.calculateSleepStreaks ? window.calculateSleepStreaks(allSleepRecords) : { currentStreak: 0, bestStreak: 0 };
+        const logsArr = Object.keys(allSleepRecords).sort().map(d => allSleepRecords[d]);
+        const consistencyInfo = window.calculateSleepConsistency ? window.calculateSleepConsistency(logsArr) : { score: 100, cumulativeDebt: 0 };
+
+        if (displayEl) {
+          displayEl.innerHTML = `${hours} <span style="font-size: 1.2rem; font-weight: 500; color: var(--text-secondary);">hrs</span>`;
+        }
+
+        // Deficit Pill
+        if (defEl) {
+          if (deficitInfo.deficit > 0) {
+            defEl.textContent = `-${deficitInfo.deficit}h`;
+            defEl.style.color = 'var(--rose)';
+          } else if (deficitInfo.surplus > 0) {
+            defEl.textContent = `+${deficitInfo.surplus}h`;
+            defEl.style.color = 'var(--mint)';
+          } else {
+            defEl.textContent = '0.0h';
+            defEl.style.color = 'var(--mint)';
+          }
+        }
+
+        if (streakEl) streakEl.textContent = `${streakInfo.currentStreak}d`;
+        if (consEl) {
+          consEl.textContent = `${consistencyInfo.score}%`;
+          consEl.style.color = consistencyInfo.badgeColor || 'var(--mint)';
+        }
+        if (debtEl) {
+          debtEl.textContent = `${consistencyInfo.cumulativeDebt}h`;
+          debtEl.style.color = consistencyInfo.cumulativeDebt > 2 ? 'var(--amber)' : 'var(--text-primary)';
+        }
+
+        // Badge quality text
+        if (badgeEl) {
+          if (isTargetMet && hours >= 7.0 && hours <= 8.5) {
+            badgeEl.className = 'pill-badge score';
+            badgeEl.textContent = '🌟 Spartan Standard Conquered (Bed &le; 11 PM · Wake &le; 6:30 AM)';
+          } else if (isTargetMet) {
+            badgeEl.className = 'pill-badge streak';
+            badgeEl.textContent = '⏰ Target Times Met (Rest adjusted)';
+          } else if (hours >= 7.0) {
+            badgeEl.className = 'pill-badge streak';
+            badgeEl.textContent = '⚠️ Adequate Hours, but Off-Schedule (Cutoff 11 PM)';
+          } else {
+            badgeEl.className = 'pill-badge';
+            badgeEl.style.borderColor = 'var(--rose)';
+            badgeEl.style.color = 'var(--rose)';
+            badgeEl.textContent = `⚠️ Sleep Deficit -${deficitInfo.deficit}h (Performance Degraded)`;
+          }
+        }
+
+        // Feedback Banner
+        if (bannerEl) {
+          bannerEl.style.display = 'block';
+          const onBed = window.isBedtimeOnTarget ? window.isBedtimeOnTarget(bed) : true;
+          const onWake = window.isWakeTimeOnTarget ? window.isWakeTimeOnTarget(wake) : true;
+
+          if (onBed && onWake) {
+            bannerEl.style.background = 'rgba(16, 185, 129, 0.12)';
+            bannerEl.style.border = '1px solid var(--mint)';
+            bannerEl.style.color = 'var(--mint)';
+            bannerEl.innerHTML = '🎯 <strong>Spartan Standard Achieved!</strong> Slept on/before 11:00 PM and woke by 6:30 AM. Restored cognitive edge & sustained focus for tomorrow.';
+          } else {
+            bannerEl.style.background = 'rgba(245, 158, 11, 0.12)';
+            bannerEl.style.border = '1px solid var(--amber)';
+            bannerEl.style.color = 'var(--amber)';
+            let msg = '⚠️ <strong>Discipline Alert:</strong> ';
+            if (!onBed && !onWake) msg += 'Slept past 11:00 PM cutoff AND woke after 6:30 AM. Your circadian rhythm and morning head start are compromised.';
+            else if (!onBed) msg += 'Bedtime was past 11:00 PM hard target. Every late hour damages prefrontal cortex recovery and costs you ground against competitors.';
+            else msg += 'Wake-up was after 6:30 AM target. Up and at it—get moving immediately to reclaim your day.';
+            bannerEl.innerHTML = msg;
+          }
+        }
+      },
+
+      // ======================================================================
+      // MASTER COMPOSITE DAILY SCORE & STREAK
+      // ======================================================================
+      calculateMasterScore() {
+        const today = getTodayString();
+
+        // 1. Timetable Attendance Contribution (20%)
+        let timetableScore = 15;
+        if (window.BITS_TIMETABLE) {
+          const report = window.BITS_TIMETABLE.getAllSubjectsAttendance();
+          timetableScore = Math.min(20, Math.round((report.overall.overallPercentage / 100) * 20));
+        }
+
+        // 2. Tasks & Habits Contribution (30%)
+        let habitsScore = 20;
+        if (window.TaskHabitEngine) {
+          const summary = window.TaskHabitEngine.habits.getCompletionSummary(today);
+          habitsScore = Math.min(30, Math.round((summary.completionRate / 100) * 30));
+        } else {
+          const habitsState = getStorage(`me_${today}_habits`, getStorage(`lt_${today}_habits`, {}));
+          const habitsCount = Object.values(habitsState).filter(Boolean).length;
+          const habitsFraction = habitsCount / Math.max(FALLBACK_HABITS.length, 1);
+          habitsScore = Math.round(habitsFraction * 30);
+        }
+
+        // 3. Food & Hydration Contribution (25%)
+        let foodScore = 15;
+        try {
+          const hydroData = FoodHealthStorage ? FoodHealthStorage.loadHydration(today) : { glasses: 0 };
+          const hydroGlasses = hydroData.glasses || 0;
+          const hydroPart = Math.min(1.0, hydroGlasses / 8) * 15;
+
+          const mealsData = FoodHealthStorage ? FoodHealthStorage.loadMeals(today) : {};
+          const totalMeals = Object.values(mealsData).flat();
+          const cleanCount = totalMeals.filter(m => m.quality === 'clean').length;
+          const junkCount = totalMeals.filter(m => m.quality === 'junk').length;
+          const mealPart = Math.max(0, Math.min(10, 10 + (cleanCount * 2) - (junkCount * 5)));
+          foodScore = Math.round(hydroPart + mealPart);
+        } catch {
+          foodScore = 15;
+        }
+
+        // 4. Sleep Contribution (25%)
+        let sleepScore = 12;
+        const sleepState = getStorage(`me_${today}_sleep`, getStorage(`lt_${today}_sleep`, {}));
+        if (sleepState.bed && sleepState.wake) {
+          const [bH, bM] = sleepState.bed.split(':').map(Number);
+          const [wH, wM] = sleepState.wake.split(':').map(Number);
+          let diff = (wH * 60 + wM) - (bH * 60 + bM);
+          if (diff <= 0) diff += 24 * 60;
+          const hours = diff / 60;
+          if (hours >= 7.0 && hours <= 8.5) sleepScore = 25;
+          else if (hours >= 6.0) sleepScore = 18;
+          else sleepScore = 10;
+        }
+
+        const composite = Math.min(100, Math.round(timetableScore + habitsScore + foodScore + sleepScore));
+
+        const scoreEl = document.getElementById('hdrScorePercent');
+        if (scoreEl) scoreEl.textContent = `${composite}%`;
+
+        this.updateStreak(composite);
+        return composite;
+      },
+
+      updateStreak(todayScore) {
+        let streak = 0;
+        const today = new Date();
+        let d = new Date(today);
+
+        if (todayScore < 40) {
+          d.setDate(d.getDate() - 1);
+        }
+
+        for (let i = 0; i < 365; i++) {
+          const dStr = d.toISOString().slice(0, 10);
+          const habits = getStorage(`me_${dStr}_habits`, getStorage(`lt_${dStr}_habits`, null));
+          if (!habits) break;
+
+          const count = Object.values(habits).filter(Boolean).length;
+          if (count >= 4) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+
+        const streakEl = document.getElementById('hdrStreakCount');
+        if (streakEl) streakEl.textContent = `${streak}d`;
+      },
+
+      // ======================================================================
+      // 1-CLICK JSON BACKUP & PERSISTENCE ENGINE
+      // ======================================================================
+      setupBackupEngine() {
+        const modal = document.getElementById('backupSyncModal');
+        const openBtn = document.getElementById('btnOpenBackupModal');
+        const closeBtn = document.getElementById('btnCloseBackupModal');
+        const exportBtn = document.getElementById('btnExportJsonFile');
+        const importTrigger = document.getElementById('btnTriggerImportFile');
+        const fileInput = document.getElementById('backupFileInput');
+        const copyBtn = document.getElementById('btnCopyJsonToClipboard');
+        const demoBtn = document.getElementById('btnLoadDemoData');
+        const resetTodayBtn = document.getElementById('btnResetTodayProgress');
+        const factoryResetBtn = document.getElementById('btnHardWipeStorage');
+
+        openBtn?.addEventListener('click', () => {
+          this.refreshBackupStats();
+          modal?.classList.add('open');
+        });
+        closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
+        modal?.addEventListener('click', (e) => {
+          if (e.target === modal) modal.classList.remove('open');
+        });
+
+        exportBtn?.addEventListener('click', () => this.exportBackupJson());
+        importTrigger?.addEventListener('click', () => fileInput?.click());
+        fileInput?.addEventListener('change', (e) => this.handleFileImport(e));
+        copyBtn?.addEventListener('click', () => this.copyBackupClipboard());
+        demoBtn?.addEventListener('click', () => this.loadFullDemoData());
+        resetTodayBtn?.addEventListener('click', () => this.resetToday());
+        factoryResetBtn?.addEventListener('click', () => this.factoryReset());
+      },
+
+      refreshBackupStats() {
+        let keyCount = 0;
+        let bytes = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('me_') || k.startsWith('lt_') || k.startsWith('bits_'))) {
+            keyCount++;
+            bytes += (localStorage.getItem(k) || '').length * 2;
+          }
+        }
+        document.getElementById('statStoredKeys').textContent = `Stored Records: ${keyCount} keys`;
+        document.getElementById('statPayloadSize').textContent = `Payload Size: ${(bytes / 1024).toFixed(2)} KB`;
+      },
+
+      generatePayload() {
+        const dump = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('me_') || k.startsWith('lt_') || k.startsWith('bits_'))) {
+            try {
+              dump[k] = JSON.parse(localStorage.getItem(k));
+            } catch {
+              dump[k] = localStorage.getItem(k);
+            }
+          }
+        }
+
+        return {
+          app: 'Me PWA — Minimalist Life OS',
+          version: '2.0.0',
+          exportedAt: new Date().toISOString(),
+          recordCount: Object.keys(dump).length,
+          storage: dump
+        };
+      },
+
+      exportBackupJson() {
+        const payload = this.generatePayload();
+        const str = JSON.stringify(payload, null, 2);
+        const blob = new Blob([str], { type: 'application/json' });
+        const filename = `me-backup-${getTodayString()}.json`;
+
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+
+        this.showToast('Backup saved! Transfer to PC or Android phone.');
+      },
+
+      copyBackupClipboard() {
+        const payload = this.generatePayload();
+        navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).then(() => {
+          this.showToast('JSON copied to clipboard!');
+        }).catch(() => {
+          this.showToast('Failed to copy to clipboard', '⚠️');
+        });
+      },
+
+      handleFileImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const parsed = JSON.parse(evt.target.result);
+            this.restorePayload(parsed);
+          } catch (err) {
+            alert('Invalid backup JSON file.');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      },
+
+      restorePayload(payload) {
+        if (!payload || !payload.storage) {
+          alert('Invalid backup structure.');
+          return;
+        }
+
+        if (!confirm(`Restore ${Object.keys(payload.storage).length} records from backup dated ${payload.exportedAt || 'Unknown'}? This merges and updates current data.`)) {
+          return;
+        }
+
+        Object.entries(payload.storage).forEach(([k, v]) => {
+          try {
+            localStorage.setItem(k, JSON.stringify(v));
+          } catch (e) {
+            console.warn(e);
+          }
+        });
+
+        document.getElementById('backupSyncModal')?.classList.remove('open');
+        this.showToast('Data restored successfully!');
+
+        // Live refresh views
+        this.renderTimetableClasses();
+        this.updateAttendanceAnalytics();
+        this.renderHabits();
+        this.renderTodos();
+        this.renderScratchpad();
+        if (this.foodComponent) this.foodComponent.render();
+        this.setupSleep();
+        this.calculateMasterScore();
+      },
+
+      loadFullDemoData() {
+        if (!confirm('Load sample demonstration data? This fills today with BITS classes, habits, meals, and sleep.')) return;
+
+        const today = getTodayString();
+
+        // Habits
+        const habits = {
+          sleep_early: true,
+          wake_early: true,
+          water_target: true,
+          healthy_meal: true,
+          no_junk: true,
+          workout: true,
+          deep_work: true,
+          no_doomscroll: false,
+          learn: true
+        };
+        setStorage(`me_${today}_habits`, habits);
+        setStorage(`lt_${today}_habits`, habits);
+
+        // Sleep
+        const sleep = { bed: '22:45', wake: '06:30', quality: '5' };
+        setStorage(`me_${today}_sleep`, sleep);
+        setStorage(`lt_${today}_sleep`, sleep);
+
+        // Reflection
+        const reflection = 'Crushed 3 hours of focused system design. Hydration on point. Ready to conquer tomorrow.';
+        setStorage(`me_${today}_journal`, reflection);
+        setStorage(`lt_${today}_journal`, reflection);
+
+        // Attendance sample for BITS
+        if (window.BITS_TIMETABLE) {
+          const schedule = window.BITS_TIMETABLE.getDailySchedule(new Date());
+          if (schedule.classes && schedule.classes.length > 0) {
+            window.BITS_TIMETABLE.markAttendance(today, schedule.classes[0].id, 'present');
+          }
+        }
+
+        document.getElementById('backupSyncModal')?.classList.remove('open');
+        this.showToast('Sample data loaded!');
+
+        this.renderTimetableClasses();
+        this.updateAttendanceAnalytics();
+        this.renderHabits();
+        this.renderTodos();
+        this.setupSleep();
+        this.calculateMasterScore();
+      },
+
+      resetToday() {
+        if (!confirm("Reset today's logged data?")) return;
+        const today = getTodayString();
+        const keys = [`me_${today}_habits`, `me_${today}_todos`, `me_${today}_sleep`, `me_${today}_journal`, `lt_${today}_habits`, `lt_${today}_sleep`, `lt_${today}_journal`];
+        keys.forEach(k => localStorage.removeItem(k));
+        location.reload();
+      },
+
+      factoryReset() {
+        if (!confirm('⚠️ Factory reset will wipe all storage keys across all dates. Continue?')) return;
+        if (!confirm('Are you 100% sure? This cannot be undone.')) return;
+        localStorage.clear();
+        location.reload();
+      },
+
+      // ======================================================================
+      // PWA INTEGRATION: SW REGISTRATION, OFFLINE HANDLING, INSTALL BANNER
+      // ======================================================================
+      setupPwa() {
+        // Register ServiceWorker
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+              .then(reg => console.log('Me PWA SW registered:', reg.scope))
+              .catch(err => console.warn('Me PWA SW failed:', err));
+          });
+        }
+
+        // Offline Status
+        const bannerOffline = document.getElementById('bannerOffline');
+        const updateOnline = () => {
+          if (!navigator.onLine) {
+            bannerOffline?.classList.add('show');
+            this.showToast('Working offline (Local database)', '⚡');
+          } else {
+            bannerOffline?.classList.remove('show');
+            this.showToast('Back online — Sync ready');
+          }
+        };
+
+        window.addEventListener('online', updateOnline);
+        window.addEventListener('offline', updateOnline);
+        if (!navigator.onLine) bannerOffline?.classList.add('show');
+
+        // PWA Install Prompt
+        let deferredPrompt = null;
+        const headerBtn = document.getElementById('btnHeaderInstall');
+        const bannerInstall = document.getElementById('bannerInstallPwa');
+        const btnPromptInstall = document.getElementById('btnPwaPromptInstall');
+        const btnPromptDismiss = document.getElementById('btnPwaPromptDismiss');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+
+          headerBtn?.classList.add('visible');
+
+          if (!sessionStorage.getItem('pwa_install_dismissed')) {
+            bannerInstall?.classList.add('show');
+          }
+        });
+
+        const triggerInstall = () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+              if (choice.outcome === 'accepted') {
+                this.showToast('Me OS installed! 🎉');
+              }
+              deferredPrompt = null;
+              bannerInstall?.classList.remove('show');
+              headerBtn?.classList.remove('visible');
+            });
+          }
+        };
+
+        headerBtn?.addEventListener('click', triggerInstall);
+        btnPromptInstall?.addEventListener('click', triggerInstall);
+        btnPromptDismiss?.addEventListener('click', () => {
+          bannerInstall?.classList.remove('show');
+          sessionStorage.setItem('pwa_install_dismissed', '1');
+        });
+
+        window.addEventListener('appinstalled', () => {
+          this.showToast('Me OS added to home screen! 🚀');
+          bannerInstall?.classList.remove('show');
+          headerBtn?.classList.remove('visible');
+        });
+      }
+    };
+
+    // Global Glue helper for inline DOM onclick handlers
+    window.MeAppGlue = {
+      markClass(dateStr, slotId, status) {
+        if (window.BITS_TIMETABLE) {
+          window.BITS_TIMETABLE.markAttendance(dateStr, slotId, status);
+          MeApp.renderTimetableClasses();
+          MeApp.updateAttendanceAnalytics();
+          MeApp.calculateMasterScore();
+          MeApp.showToast(`Marked ${status}`);
+        }
+      },
+      saveNote(dateStr, slotId, note) {
+        if (window.BITS_TIMETABLE) {
+          window.BITS_TIMETABLE.saveClassNote(dateStr, slotId, note);
+          MeApp.showToast('Note saved');
+        }
+      },
+      toggleHabit(id) {
+        MeApp.toggleHabit(id);
+      },
+      toggleTodo(id) {
+        MeApp.toggleTodo(id);
+      },
+      deleteTodo(id) {
+        MeApp.deleteTodo(id);
+      },
+      convertScratchToTask(id) {
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.scratchpad.convertToTodo(id);
+          MeApp.renderTodos();
+          MeApp.renderScratchpad();
+          MeApp.showToast('Converted to task!');
+        }
+      },
+      deleteScratchNote(id) {
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.scratchpad.deleteNote(id);
+          MeApp.renderScratchpad();
+        }
+      }
+    };
+
+    window.MeApp = MeApp;
+
+    // Helpers
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;');
+    }
+
+    // Launch on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      MeApp.init();
+    });
+
+  })();
+</script>
+
+</body>
+</html>

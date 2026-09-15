@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TaskHabitEngine Unit Tests</title>
+</head>
+<body>
+  <h1>TaskHabitEngine Test Suite</h1>
+  <div id="results">Running tests...</div>
+
+  <script src="task-habit-engine.js"></script>
+  <script>
+    const resultsDiv = document.getElementById('results');
+    const logs = [];
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error('Assertion Failed: ' + message);
+      }
+      logs.push('  PASS: ' + message);
+    }
+
+    function runTests() {
+      try {
+        logs.push('=== STARTING UNIT TESTS ===');
+        const engine = window.TaskHabitEngine;
+        assert(!!engine, 'TaskHabitEngine exists on window');
+
+        // Reset to clean test slate
+        engine.resetAll();
+
+        // -------------------------------------------------------------
+        // TEST SUITE 1: FLEXIBLE TO-DO LIST
+        // -------------------------------------------------------------
+        logs.push('\n--- Test Suite 1: Flexible To-Do List ---');
+
+        // 1.1 Categories
+        const chore = engine.todos.addTask({
+          title: 'Mop floor and fold laundry',
+          category: engine.TASK_CATEGORIES.DAILY_CHORE,
+          dueDate: engine.utils.getTodayString()
+        });
+        assert(chore.category === 'Daily chore', 'Task created with Daily chore category');
+        assert(chore.completed === false, 'Task initial state is not completed');
+
+        const exam = engine.todos.addTask({
+          title: 'Discrete Mathematics Final Exam',
+          category: engine.TASK_CATEGORIES.TEST_EXAM,
+          description: 'Syllabus: Graph Theory, Combinatorics',
+          dueDate: engine.utils.addDaysToString(engine.utils.getTodayString(), 4),
+          dueTime: '09:00',
+          locationOrLink: 'Auditorium 1'
+        });
+        assert(exam.category === 'Test/Exam', 'Task created with Test/Exam category');
+        assert(exam.priority === 'high', 'Test/Exam defaults to high priority');
+
+        const meeting = engine.todos.addTask({
+          title: 'Placement Cell Orientation Meeting',
+          category: engine.TASK_CATEGORIES.MEETING,
+          dueDate: engine.utils.addDaysToString(engine.utils.getTodayString(), 2),
+          dueTime: '14:00',
+          locationOrLink: 'Conference Room C'
+        });
+        assert(meeting.category === 'Meeting', 'Task created with Meeting category');
+
+        const urgent = engine.todos.addTask({
+          title: 'Pay Hostel Mess Fee Deadline',
+          category: engine.TASK_CATEGORIES.URGENT,
+          dueDate: engine.utils.getTodayString(),
+          priority: 'urgent'
+        });
+        assert(urgent.category === 'Urgent', 'Task created with Urgent category');
+        assert(urgent.priority === 'urgent', 'Urgent category gets urgent priority');
+
+        // 1.2 Toggle Done
+        const toggled = engine.todos.toggleTask(chore.id);
+        assert(toggled.completed === true, 'Task successfully toggled to completed');
+        assert(!!toggled.completedAt, 'completedAt timestamp was set on toggle');
+
+        const toggledBack = engine.todos.toggleTask(chore.id);
+        assert(toggledBack.completed === false, 'Task successfully toggled back to incomplete');
+        assert(toggledBack.completedAt === null, 'completedAt timestamp cleared on un-check');
+
+        // 1.3 Filtering
+        const examFilter = engine.todos.getTasks({ category: 'Test/Exam' });
+        assert(examFilter.some(t => t.id === exam.id), 'Filter by category Test/Exam returns the exam');
+        assert(examFilter.every(t => t.category === 'Test/Exam'), 'All filtered tasks match category');
+
+        const activeTasks = engine.todos.getTasks({ status: 'active' });
+        assert(activeTasks.every(t => !t.completed), 'Filter by active only returns incomplete tasks');
+
+        const searchResults = engine.todos.getTasks({ search: 'Auditorium 1' });
+        assert(searchResults.length === 1 && searchResults[0].id === exam.id, 'Search queries search locationOrLink');
+
+        // 1.4 Upcoming Tests & Meetings
+        const upcoming = engine.todos.getUpcomingTestsAndMeetings();
+        assert(upcoming.length >= 2, 'Upcoming tests and meetings helper returned agenda');
+        assert(upcoming.some(item => item.id === exam.id), 'Exam included in upcoming list');
+        assert(upcoming.some(item => item.id === meeting.id), 'Meeting included in upcoming list');
+        assert(!!upcoming[0].countdownBadge, 'Countdown badge generated for upcoming test/meeting');
+
+        // 1.5 Delete Task
+        const deleteSuccess = engine.todos.deleteTask(urgent.id);
+        assert(deleteSuccess === true, 'Task deletion succeeded');
+        assert(engine.todos.getById(urgent.id) === null, 'Deleted task is no longer in storage');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 2: DYNAMIC HABIT ENGINE
+        // -------------------------------------------------------------
+        logs.push('\n--- Test Suite 2: Customizable Recurring Tasks ---');
+
+        // 2.1 Default Pre-seeded Habits
+        const defaultHabits = engine.habits.getAllHabits();
+        assert(defaultHabits.length >= 3, 'Pre-seeded habits loaded');
+
+        const oilHair = defaultHabits.find(h => h.name === 'Oil Hair');
+        assert(!!oilHair, 'Default habit "Oil Hair" found');
+        assert(oilHair.frequency === 'custom_days', '"Oil Hair" frequency is custom_days');
+        assert(oilHair.daysOfWeek.includes(0) && oilHair.daysOfWeek.includes(3), '"Oil Hair" scheduled on Wed (3) and Sun (0)');
+
+        const dryFruits = defaultHabits.find(h => h.name === 'Eat Dry Fruits');
+        assert(!!dryFruits, 'Default habit "Eat Dry Fruits" found');
+        assert(dryFruits.frequency === 'daily', '"Eat Dry Fruits" is Daily');
+        assert(dryFruits.timeOfDay === 'morning', '"Eat Dry Fruits" is scheduled for morning');
+
+        const water3L = defaultHabits.find(h => h.name === 'Drink 3L Water');
+        assert(!!water3L, 'Default habit "Drink 3L Water" found');
+        assert(water3L.targetValue === 3 && water3L.unit === 'Liters', '"Drink 3L Water" target is 3 Liters');
+
+        // 2.2 ADD custom recurring habit
+        const customHabit = engine.habits.addHabit({
+          name: 'Practice LeetCode / Coding',
+          icon: '💻',
+          category: 'Academics',
+          frequency: engine.HABIT_FREQUENCIES.WEEKDAYS, // Mon-Fri
+          timeOfDay: 'evening',
+          targetValue: 2,
+          unit: 'problems'
+        });
+        assert(!!customHabit.id, 'User can ADD custom recurring habit with dynamic ID');
+        assert(engine.habits.getHabitById(customHabit.id) !== null, 'Newly added habit exists in storage');
+
+        // 2.3 EDIT recurring habit
+        const editedHabit = engine.habits.editHabit(customHabit.id, {
+          name: 'Practice LeetCode 3 Problems',
+          targetValue: 3
+        });
+        assert(editedHabit.name === 'Practice LeetCode 3 Problems', 'Habit name successfully EDITed');
+        assert(editedHabit.targetValue === 3, 'Habit targetValue successfully EDITed');
+
+        // 2.4 REMOVE recurring habit
+        const removeSuccess = engine.habits.removeHabit(customHabit.id, true);
+        assert(removeSuccess === true, 'User can REMOVE recurring habit');
+        assert(engine.habits.getHabitById(customHabit.id) === null, 'Removed habit is gone');
+
+        // 2.5 Scheduling check for custom days
+        // Sunday (2026-09-20) vs Monday (2026-09-21)
+        const isSunScheduled = engine.habits.isHabitScheduledForDate(oilHair, '2026-09-20'); // Sunday
+        const isMonScheduled = engine.habits.isHabitScheduledForDate(oilHair, '2026-09-21'); // Monday
+        const isWedScheduled = engine.habits.isHabitScheduledForDate(oilHair, '2026-09-23'); // Wednesday
+        assert(isSunScheduled === true, '"Oil Hair" scheduled on Sunday');
+        assert(isMonScheduled === false, '"Oil Hair" NOT scheduled on Monday');
+        assert(isWedScheduled === true, '"Oil Hair" scheduled on Wednesday');
+
+        // 2.6 Logging & Numeric Progress
+        const todayStr = engine.utils.getTodayString();
+        engine.habits.logHabitProgress(water3L.id, 1.5, todayStr);
+        let scheduledToday = engine.habits.getScheduledHabitsForDate(todayStr);
+        let waterEntry = scheduledToday.find(h => h.id === water3L.id);
+        assert(waterEntry.currentValue === 1.5, 'Water progress logged at 1.5L');
+        assert(waterEntry.completed === false, 'Water is not yet completed at 1.5L (target 3L)');
+
+        engine.habits.logHabitProgress(water3L.id, 3.0, todayStr);
+        scheduledToday = engine.habits.getScheduledHabitsForDate(todayStr);
+        waterEntry = scheduledToday.find(h => h.id === water3L.id);
+        assert(waterEntry.completed === true, 'Water completes when target reached');
+
+        // 2.7 Toggle habit
+        engine.habits.toggleHabitCompletion(dryFruits.id, todayStr);
+        scheduledToday = engine.habits.getScheduledHabitsForDate(todayStr);
+        let dryFruitEntry = scheduledToday.find(h => h.id === dryFruits.id);
+        assert(dryFruitEntry.completed === true, 'Dry fruits habit toggled to complete');
+
+        // 2.8 Daily Score
+        const dailyScore = engine.habits.getDailyScore(todayStr);
+        assert(typeof dailyScore === 'number' && dailyScore > 0, 'Daily score calculated: ' + dailyScore + '%');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 3: 'SOMEBODY TOLD ME' SCRATCHPAD
+        // -------------------------------------------------------------
+        logs.push('\n--- Test Suite 3: Somebody Told Me Scratchpad ---');
+
+        // 3.1 Instant Capture
+        const note = engine.scratchpad.addNote({
+          person: 'Prof. Sharma',
+          context: 'Signal Processing Lab',
+          text: 'Submit the DSP lab experiment report by Thursday 5 PM or lose 5 marks',
+          reminderTag: 'DSP report by Thursday 5 PM',
+          reminderDate: engine.utils.addDaysToString(todayStr, 2),
+          priority: 'high'
+        });
+        assert(!!note.id, 'Scratchpad note captured with ID');
+        assert(note.person === 'Prof. Sharma', 'Person captured accurately');
+        assert(note.reminderTag === 'DSP report by Thursday 5 PM', 'Reminder tag captured accurately');
+        assert(note.isResolved === false, 'New note starts unresolved');
+
+        // 3.2 Update note
+        const updatedNote = engine.scratchpad.updateNote(note.id, {
+          context: 'Signal Processing Lab 201'
+        });
+        assert(updatedNote.context === 'Signal Processing Lab 201', 'Note context successfully updated');
+
+        // 3.3 Toggle Resolved
+        const resolvedNote = engine.scratchpad.toggleResolved(note.id);
+        assert(resolvedNote.isResolved === true, 'Note marked as resolved');
+        engine.scratchpad.toggleResolved(note.id); // unresolve
+
+        // 3.4 CONVERT TO TASK (Escalate Scratchpad note directly to To-Do!)
+        const conversion = engine.scratchpad.convertToTask(note.id, engine.TASK_CATEGORIES.URGENT);
+        assert(!!conversion.task, 'To-Do task created from Scratchpad note');
+        assert(conversion.task.category === 'Urgent', 'Task has category Urgent');
+        assert(conversion.task.sourceNoteId === note.id, 'Task is linked to source scratchpad note');
+        assert(conversion.note.isResolved === true, 'Scratchpad note automatically resolved on conversion');
+        assert(conversion.note.convertedToTaskId === conversion.task.id, 'Scratchpad note contains converted task ID link');
+
+        // 3.5 People suggestions
+        const people = engine.scratchpad.getPeopleList();
+        assert(people.some(p => p.name === 'Prof. Sharma'), 'Prof. Sharma listed in unique people suggestions');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 4: BACKUP EXPORT & IMPORT
+        // -------------------------------------------------------------
+        logs.push('\n--- Test Suite 4: Backup Export & Import ---');
+        const backup = engine.exportBackup();
+        assert(!!backup && !!backup.todos && !!backup.habits, 'Backup exported with all data');
+        assert(backup.meta.totalHabits >= 3, 'Backup contains habits count metadata');
+
+        const importRes = engine.importBackup(backup, 'merge');
+        assert(importRes === true, 'Backup successfully imported');
+
+        logs.push('\n========================================');
+        logs.push('ALL TESTS PASSED SUCCESSFULLY! (100% OK)');
+        logs.push('========================================');
+
+        resultsDiv.innerText = logs.join('\n');
+        document.body.style.backgroundColor = '#0d2818';
+        document.body.style.color = '#75e0a0';
+        window.__TEST_STATUS__ = 'SUCCESS';
+      } catch (err) {
+        logs.push('\nTEST FAILED WITH ERROR: ' + err.message + '\n' + err.stack);
+        resultsDiv.innerText = logs.join('\n');
+        document.body.style.backgroundColor = '#2c0b0e';
+        document.body.style.color = '#ff8080';
+        window.__TEST_STATUS__ = 'FAILED: ' + err.message;
+        console.error(err);
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>
