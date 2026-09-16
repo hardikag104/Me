@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <title>Me Life OS ΓÇö Storage, Backup &amp; PWA Test Suite</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #09090d;
+      color: #f3f4f8;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 {
+      color: #7c5cfc;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .summary {
+      padding: 12px 16px;
+      background: #12121a;
+      border: 1px solid #1f1f2e;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    .pass-count { color: #10b981; font-weight: bold; }
+    .fail-count { color: #ef4444; font-weight: bold; }
+    .log-item {
+      padding: 6px 10px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: monospace;
+    }
+    .log-item.pass {
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+      border-left: 3px solid #10b981;
+    }
+    .log-item.fail {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-left: 3px solid #ef4444;
+    }
+    .suite-header {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #c4b5fd;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>≡ƒ¢í∩╕Å Me Life OS ΓÇö Agent 9: Data Persistence, Backup &amp; PWA Test Suite</h1>
+  <div class="summary" id="testSummary">
+        <strong>Test Run Complete:</strong>
+        <span class="pass-count">63 Passed</span> |
+        <span class="fail-count">0 Failed</span>
+      </div>
+
+  <!-- Hidden elements to emulate UI DOM elements if needed -->
+  <div style="display:none;">
+    <div id="backupSyncModal"></div>
+    <button id="btnOpenBackupModal"></button>
+    <button id="btnCloseBackupModal"></button>
+    <button id="btnExportJsonFile"></button>
+    <button id="btnTriggerImportFile"></button>
+    <input type="file" id="backupFileInput">
+    <button id="btnCopyJsonToClipboard"></button>
+    <button id="btnPasteJsonClipboard"></button>
+    <button id="btnLoadDemoData"></button>
+    <button id="btnResetTodayProgress"></button>
+    <button id="btnHardWipeStorage"></button>
+    <div id="pasteJsonSection">
+      <textarea id="directJsonInput"></textarea>
+      <button id="btnRestoreDirectJson"></button>
+      <button id="btnClearDirectJson"></button>
+      <button id="btnClosePasteSection"></button>
+    </div>
+    <div id="statStoredKeys">Stored Records: 9 keys</div>
+    <div id="statPayloadSize">Payload Size: 0.85 KB</div>
+    <div id="statStorageEngine">Client-Side LocalStorage (Private &amp; Offline)</div>
+    <div id="bannerOffline"></div>
+    <div id="bannerInstallPwa"></div>
+    <button id="btnHeaderInstall"></button>
+    <button id="btnPwaPromptInstall"></button>
+    <button id="btnPwaPromptDismiss"></button>
+    <div id="global-toast" class="show"><span id="globalToastIcon">Γ£¿</span><span id="globalToastMsg">Data restored successfully! All views refreshed.</span></div>
+  </div>
+
+  <div id="testLogs"><div class="suite-header">1. Unified Storage Adapter (window.MeStorage)</div><div class="log-item pass">Γ£ô PASS: MeStorage is registered on window</div><div class="log-item pass">Γ£ô PASS: MeStorage has getItem</div><div class="log-item pass">Γ£ô PASS: MeStorage has setItem</div><div class="log-item pass">Γ£ô PASS: MeStorage has removeItem</div><div class="log-item pass">Γ£ô PASS: MeStorage has safeParse</div><div class="log-item pass">Γ£ô PASS: MeStorage has safeStringify</div><div class="log-item pass">Γ£ô PASS: safeParse parses valid JSON string</div><div class="log-item pass">Γ£ô PASS: safeParse returns fallback for null</div><div class="log-item pass">Γ£ô PASS: safeParse returns fallback for undefined</div><div class="log-item pass">Γ£ô PASS: safeParse catches syntax error and returns fallback safely</div><div class="log-item pass">Γ£ô PASS: safeParse handles numeric primitive</div><div class="log-item pass">Γ£ô PASS: safeStringify stringifies regular objects</div><div class="log-item pass">Γ£ô PASS: safeStringify cleanly handles circular references without crashing</div><div class="log-item pass">Γ£ô PASS: setItem and getItem preserve rich objects</div><div class="log-item pass">Γ£ô PASS: hasItem returns true for existing key</div><div class="log-item pass">Γ£ô PASS: removeItem deletes key</div><div class="log-item pass">Γ£ô PASS: getItem returns fallback for deleted key</div><div class="log-item pass">Γ£ô PASS: Storage schema version is tracked (&gt;= 2)</div><div class="log-item pass">Γ£ô PASS: getStorageUsage returns totalKeys count</div><div class="log-item pass">Γ£ô PASS: getStorageUsage returns formatted sizeKB string</div><div class="log-item pass">Γ£ô PASS: getStorageUsage indicates storage backend type</div><div class="log-item pass">Γ£ô PASS: PubSub listener receives setItem changes</div><div class="log-item pass">Γ£ô PASS: Unsubscribe stops receiving events</div><div class="log-item pass">Γ£ô PASS: saveTasksData &amp; getTasksData work seamlessly</div><div class="log-item pass">Γ£ô PASS: saveHabitsData &amp; getHabitsData work seamlessly</div><div class="log-item pass">Γ£ô PASS: saveFoodData &amp; getFoodData persist food &amp; hydration</div><div class="log-item pass">Γ£ô PASS: saveSleepData &amp; getSleepData persist sleep &amp; reflections</div><div class="suite-header">2. 1-Click Backup &amp; Restore Engine (window.MeBackup)</div><div class="log-item pass">Γ£ô PASS: MeBackup is registered on window</div><div class="log-item pass">Γ£ô PASS: MeBackup has generatePayload</div><div class="log-item pass">Γ£ô PASS: MeBackup has exportBackupJson</div><div class="log-item pass">Γ£ô PASS: MeBackup has restorePayload</div><div class="log-item pass">Γ£ô PASS: MeBackup has copyBackupClipboard</div><div class="log-item pass">Γ£ô PASS: MeBackup has pasteFromClipboard</div><div class="log-item pass">Γ£ô PASS: Payload contains app branding identifier</div><div class="log-item pass">Γ£ô PASS: Payload version is 2.0.0</div><div class="log-item pass">Γ£ô PASS: Payload includes schemaVersion</div><div class="log-item pass">Γ£ô PASS: Payload includes ISO exportedAt timestamp</div><div class="log-item pass">Γ£ô PASS: Payload includes stats summary</div><div class="log-item pass">Γ£ô PASS: Payload includes structured semantic data domains</div><div class="log-item pass">Γ£ô PASS: Payload includes rawStorage key-value dictionary</div><div class="log-item pass">Γ£ô PASS: Payload data contains timetable domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains attendance domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains tasks domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains habits domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains scratchpad domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains food domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains sleep domain</div><div class="log-item pass">Γ£ô PASS: Payload data contains theme domain</div><div class="log-item pass">Γ£ô PASS: exportBackupJson uses exact expected name: me-life-os-backup-2026-09-16.json</div><div class="log-item pass">Γ£ô PASS: restorePayload returns true on valid backup structure</div><div class="log-item pass">Γ£ô PASS: restorePayload dispatches "me:data-restored" custom event</div><div class="log-item pass">Γ£ô PASS: Restored task correctly updated in storage</div><div class="log-item pass">Γ£ô PASS: Restored meals correctly updated in storage</div><div class="log-item pass">Γ£ô PASS: restorePayload seamlessly supports legacy storage format</div><div class="log-item pass">Γ£ô PASS: Legacy records restored cleanly</div><div class="log-item pass">Γ£ô PASS: MeBackup provides openDirectPasteDrawer</div><div class="log-item pass">Γ£ô PASS: MeBackup provides restoreFromDirectInput</div><div class="suite-header">3. PWA Engine (window.MePWA)</div><div class="log-item pass">Γ£ô PASS: MePWA is registered on window</div><div class="log-item pass">Γ£ô PASS: MePWA has init</div><div class="log-item pass">Γ£ô PASS: MePWA has isOnline check</div><div class="log-item pass">Γ£ô PASS: isOnline accurately matches navigator.onLine</div><div class="log-item pass">Γ£ô PASS: MePWA has canInstall method</div><div class="log-item pass">Γ£ô PASS: MePWA tracks isStandalone flag</div></div>
+
+  <!-- Load Module Under Test -->
+  <script src="ui-storage-pwa.js"></script>
+
+  <script>
+    const logsContainer = document.getElementById('testLogs');
+    const summaryContainer = document.getElementById('testSummary');
+    let passCount = 0;
+    let failCount = 0;
+
+    function assert(condition, message) {
+      const el = document.createElement('div');
+      if (condition) {
+        passCount++;
+        el.className = 'log-item pass';
+        el.textContent = 'Γ£ô PASS: ' + message;
+      } else {
+        failCount++;
+        el.className = 'log-item fail';
+        el.textContent = 'Γ£ò FAIL: ' + message;
+      }
+      logsContainer.appendChild(el);
+    }
+
+    function addSuiteHeader(title) {
+      const el = document.createElement('div');
+      el.className = 'suite-header';
+      el.textContent = title;
+      logsContainer.appendChild(el);
+    }
+
+    // Run Tests
+    (function runTestSuite() {
+      // -------------------------------------------------------------
+      // SUITE 1: UNIFIED STORAGE ADAPTER (window.MeStorage)
+      // -------------------------------------------------------------
+      addSuiteHeader('1. Unified Storage Adapter (window.MeStorage)');
+
+      assert(typeof window.MeStorage !== 'undefined', 'MeStorage is registered on window');
+      assert(typeof window.MeStorage.getItem === 'function', 'MeStorage has getItem');
+      assert(typeof window.MeStorage.setItem === 'function', 'MeStorage has setItem');
+      assert(typeof window.MeStorage.removeItem === 'function', 'MeStorage has removeItem');
+      assert(typeof window.MeStorage.safeParse === 'function', 'MeStorage has safeParse');
+      assert(typeof window.MeStorage.safeStringify === 'function', 'MeStorage has safeStringify');
+
+      // 1.1 Safe Parse
+      assert(window.MeStorage.safeParse('{"key":"value"}').key === 'value', 'safeParse parses valid JSON string');
+      assert(window.MeStorage.safeParse(null, { def: 1 }).def === 1, 'safeParse returns fallback for null');
+      assert(window.MeStorage.safeParse(undefined, 'fallback') === 'fallback', 'safeParse returns fallback for undefined');
+      assert(window.MeStorage.safeParse('{invalid json', { fallback: true }).fallback === true, 'safeParse catches syntax error and returns fallback safely');
+      assert(window.MeStorage.safeParse(42) === 42, 'safeParse handles numeric primitive');
+
+      // 1.2 Safe Stringify
+      const simpleObj = { a: 1, b: 'text', c: [1, 2, 3] };
+      assert(window.MeStorage.safeStringify(simpleObj) === JSON.stringify(simpleObj), 'safeStringify stringifies regular objects');
+      const circular = { name: 'circular' };
+      circular.self = circular;
+      const circStr = window.MeStorage.safeStringify(circular);
+      assert(circStr.includes('[Circular]'), 'safeStringify cleanly handles circular references without crashing');
+
+      // 1.3 Key-Value Persistence
+      const testKey = 'me_test_key_' + Date.now();
+      window.MeStorage.setItem(testKey, { count: 99, status: 'active' });
+      const readBack = window.MeStorage.getItem(testKey);
+      assert(readBack && readBack.count === 99 && readBack.status === 'active', 'setItem and getItem preserve rich objects');
+      assert(window.MeStorage.hasItem(testKey) === true, 'hasItem returns true for existing key');
+      window.MeStorage.removeItem(testKey);
+      assert(window.MeStorage.hasItem(testKey) === false, 'removeItem deletes key');
+      assert(window.MeStorage.getItem(testKey, null) === null, 'getItem returns fallback for deleted key');
+
+      // 1.4 Versioning
+      const schemaVer = window.MeStorage.getItem('me_storage_schema_version');
+      assert(typeof schemaVer === 'number' && schemaVer >= 2, 'Storage schema version is tracked (>= 2)');
+
+      // 1.5 Storage Usage Calculator
+      const usage = window.MeStorage.getStorageUsage();
+      assert(typeof usage.totalKeys === 'number', 'getStorageUsage returns totalKeys count');
+      assert(typeof usage.sizeKB === 'string', 'getStorageUsage returns formatted sizeKB string');
+      assert(typeof usage.isLocalStorage === 'boolean', 'getStorageUsage indicates storage backend type');
+
+      // 1.6 PubSub Event Emitter
+      let eventFired = false;
+      let eventPayload = null;
+      const unsubscribe = window.MeStorage.on('change:me_pubsub_test', (data) => {
+        eventFired = true;
+        eventPayload = data;
+      });
+      window.MeStorage.setItem('me_pubsub_test', { fired: true });
+      assert(eventFired === true && eventPayload.value.fired === true, 'PubSub listener receives setItem changes');
+      unsubscribe();
+      eventFired = false;
+      window.MeStorage.setItem('me_pubsub_test', { fired: 2 });
+      assert(eventFired === false, 'Unsubscribe stops receiving events');
+      window.MeStorage.removeItem('me_pubsub_test');
+
+      // 1.7 Domain-Specific Accessors
+      window.MeStorage.saveTasksData({ todos: [{ id: 't1', title: 'Test Task' }] });
+      const tasksData = window.MeStorage.getTasksData();
+      assert(Array.isArray(tasksData.todos) && tasksData.todos[0].title === 'Test Task', 'saveTasksData & getTasksData work seamlessly');
+
+      window.MeStorage.saveHabitsData({ habits: [{ id: 'h1', name: 'Sleep early' }] });
+      const habitsData = window.MeStorage.getHabitsData();
+      assert(Array.isArray(habitsData.habits) && habitsData.habits[0].name === 'Sleep early', 'saveHabitsData & getHabitsData work seamlessly');
+
+      window.MeStorage.saveFoodData('2026-09-17', { meals: { breakfast: ['Oats'] }, hydration: { glasses: 4 } });
+      const foodData = window.MeStorage.getFoodData('2026-09-17');
+      assert(foodData.meals.breakfast[0] === 'Oats' && foodData.hydration.glasses === 4, 'saveFoodData & getFoodData persist food & hydration');
+
+      window.MeStorage.saveSleepData('2026-09-17', { sleep: { bed: '23:00', wake: '06:30' }, journal: 'Great discipline.' });
+      const sleepData = window.MeStorage.getSleepData('2026-09-17');
+      assert(sleepData.sleep.bed === '23:00' && sleepData.journal === 'Great discipline.', 'saveSleepData & getSleepData persist sleep & reflections');
+
+      // -------------------------------------------------------------
+      // SUITE 2: 1-CLICK BACKUP & RESTORE ENGINE (window.MeBackup)
+      // -------------------------------------------------------------
+      addSuiteHeader('2. 1-Click Backup & Restore Engine (window.MeBackup)');
+
+      assert(typeof window.MeBackup !== 'undefined', 'MeBackup is registered on window');
+      assert(typeof window.MeBackup.generatePayload === 'function', 'MeBackup has generatePayload');
+      assert(typeof window.MeBackup.exportBackupJson === 'function', 'MeBackup has exportBackupJson');
+      assert(typeof window.MeBackup.restorePayload === 'function', 'MeBackup has restorePayload');
+      assert(typeof window.MeBackup.copyBackupClipboard === 'function', 'MeBackup has copyBackupClipboard');
+      assert(typeof window.MeBackup.pasteFromClipboard === 'function', 'MeBackup has pasteFromClipboard');
+
+      // 2.1 Payload Schema Validation
+      const payload = window.MeBackup.generatePayload();
+      assert(payload.app.includes('Me'), 'Payload contains app branding identifier');
+      assert(payload.version === '2.0.0', 'Payload version is 2.0.0');
+      assert(typeof payload.schemaVersion === 'number', 'Payload includes schemaVersion');
+      assert(typeof payload.exportedAt === 'string', 'Payload includes ISO exportedAt timestamp');
+      assert(typeof payload.stats === 'object', 'Payload includes stats summary');
+      assert(typeof payload.data === 'object', 'Payload includes structured semantic data domains');
+      assert(typeof payload.rawStorage === 'object', 'Payload includes rawStorage key-value dictionary');
+
+      // Verify all 8 core domains are present in data:
+      assert('timetable' in payload.data, 'Payload data contains timetable domain');
+      assert('attendance' in payload.data, 'Payload data contains attendance domain');
+      assert('tasks' in payload.data, 'Payload data contains tasks domain');
+      assert('habits' in payload.data, 'Payload data contains habits domain');
+      assert('scratchpad' in payload.data, 'Payload data contains scratchpad domain');
+      assert('food' in payload.data, 'Payload data contains food domain');
+      assert('sleep' in payload.data, 'Payload data contains sleep domain');
+      assert('theme' in payload.data, 'Payload data contains theme domain');
+
+      // 2.2 Export Filename Pattern
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const expectedFilename = `me-life-os-backup-${todayIso}.json`;
+      const generatedFilename = window.MeBackup.exportBackupJson();
+      assert(generatedFilename === expectedFilename, `exportBackupJson uses exact expected name: ${expectedFilename}`);
+
+      // 2.3 Import & Restoration
+      let restoreEventFired = false;
+      const onRestoreListener = (e) => { restoreEventFired = true; };
+      window.addEventListener('me:data-restored', onRestoreListener);
+
+      const sampleBackup = {
+        app: 'Me ΓÇö Minimalist Life OS',
+        version: '2.0.0',
+        exportedAt: new Date().toISOString(),
+        rawStorage: {
+          'me_tasks_todos': [{ id: 'restored_1', title: 'Restored Task', completed: false }],
+          'me_tasks_habits': [{ id: 'restored_h1', name: 'Restored Habit' }],
+          'lt_2026-09-17_meals': { breakfast: ['Pancakes'], lunch: [], snacks: [], dinner: [] },
+          'me_2026-09-17_sleep': { bed: '22:30', wake: '06:00' }
+        }
+      };
+
+      const restoreSuccess = window.MeBackup.restorePayload(sampleBackup, { skipConfirm: true });
+      assert(restoreSuccess === true, 'restorePayload returns true on valid backup structure');
+      assert(restoreEventFired === true, 'restorePayload dispatches "me:data-restored" custom event');
+      window.removeEventListener('me:data-restored', onRestoreListener);
+
+      const checkTask = window.MeStorage.getItem('me_tasks_todos');
+      assert(checkTask && checkTask[0].title === 'Restored Task', 'Restored task correctly updated in storage');
+
+      const checkMeal = window.MeStorage.getItem('lt_2026-09-17_meals');
+      assert(checkMeal && checkMeal.breakfast[0] === 'Pancakes', 'Restored meals correctly updated in storage');
+
+      // 2.4 Legacy Backup Support (storage: { ... })
+      const legacyBackup = {
+        app: 'Me PWA ΓÇö Minimalist Life OS',
+        version: '1.0.0',
+        storage: {
+          'me_tasks_todos': [{ id: 'legacy_1', title: 'Legacy Todo' }]
+        }
+      };
+      const legacyRestoreSuccess = window.MeBackup.restorePayload(legacyBackup, { skipConfirm: true });
+      assert(legacyRestoreSuccess === true, 'restorePayload seamlessly supports legacy storage format');
+      const checkLegacy = window.MeStorage.getItem('me_tasks_todos');
+      assert(checkLegacy && checkLegacy[0].title === 'Legacy Todo', 'Legacy records restored cleanly');
+
+      // 2.5 Direct Text Area Paste Support
+      assert(typeof window.MeBackup.openDirectPasteDrawer === 'function', 'MeBackup provides openDirectPasteDrawer');
+      assert(typeof window.MeBackup.restoreFromDirectInput === 'function', 'MeBackup provides restoreFromDirectInput');
+
+      // -------------------------------------------------------------
+      // SUITE 3: PWA ENGINE (window.MePWA)
+      // -------------------------------------------------------------
+      addSuiteHeader('3. PWA Engine (window.MePWA)');
+
+      assert(typeof window.MePWA !== 'undefined', 'MePWA is registered on window');
+      assert(typeof window.MePWA.init === 'function', 'MePWA has init');
+      assert(typeof window.MePWA.isOnline === 'function', 'MePWA has isOnline check');
+      assert(window.MePWA.isOnline() === navigator.onLine, 'isOnline accurately matches navigator.onLine');
+      assert(typeof window.MePWA.canInstall === 'function', 'MePWA has canInstall method');
+      assert(typeof window.MePWA.isStandalone === 'boolean', 'MePWA tracks isStandalone flag');
+
+      // Finish and summarize
+      summaryContainer.innerHTML = `
+        <strong>Test Run Complete:</strong>
+        <span class="pass-count">${passCount} Passed</span> |
+        <span class="fail-count">${failCount} Failed</span>
+      `;
+    })();
+  </script>
+
+
+</body></html>

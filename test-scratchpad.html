@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent 6: Somebody Told Me Scratchpad Unit Tests</title>
+  <style>
+    body { font-family: monospace; background: #09090d; color: #f3f4f8; padding: 20px; }
+    #results { white-space: pre-wrap; line-height: 1.5; font-size: 14px; }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <h2>Agent 6: Somebody Told Me Scratchpad Test Suite</h2>
+  <div id="mountPoint" style="display: none;"></div>
+  <div id="results">Running tests...</div>
+
+  <script src="task-habit-engine.js"></script>
+  <script src="ui-scratchpad.js"></script>
+  <script>
+    const resultsDiv = document.getElementById('results');
+    const logs = [];
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error('Assertion Failed: ' + message);
+      }
+      logs.push('  PASS: ' + message);
+    }
+
+    function runAllTests() {
+      try {
+        logs.push('==================================================');
+        logs.push('STARTING AGENT 6: SOMEBODY TOLD ME SCRATCHPAD TESTS');
+        logs.push('==================================================');
+
+        // Test 1: Global Attachments
+        assert(typeof window.SomebodyToldMeUI === 'function', 'SomebodyToldMeUI class exists');
+        assert(typeof window.ScratchpadUIComponent === 'function', 'ScratchpadUIComponent alias exists');
+        assert(typeof window.ScratchpadStorage === 'function', 'ScratchpadStorage exists');
+        assert(typeof window.ScratchpadTaskConverter === 'function', 'ScratchpadTaskConverter exists');
+
+        // Reset storage
+        localStorage.removeItem('me_tasks_scratchpad');
+        localStorage.removeItem('me_tasks_todos');
+
+        // Test 2: Storage Seeding
+        const notes = window.ScratchpadStorage.getAll();
+        assert(Array.isArray(notes) && notes.length >= 4, 'Scratchpad seeds realistic notes on start: ' + notes.length);
+
+        // Test 3: Quick Capture Add Note
+        const newNote = window.ScratchpadStorage.addNote({
+          person: 'Rahul',
+          context: 'Hostel 4 Corridor',
+          text: 'Bring Machine Elements book on Friday morning',
+          reminderDate: '2026-09-18',
+          reminderTag: 'Return book by Friday',
+          priority: 'high',
+          categoryHint: 'Daily chore'
+        });
+        assert(!!newNote.id, 'Note captured with unique ID: ' + newNote.id);
+        assert(newNote.person === 'Rahul', 'Note person matches "Rahul"');
+        assert(newNote.isResolved === false, 'New note starts as Active (isResolved = false)');
+        assert(newNote.priority === 'high', 'Note has high priority');
+
+        // Test 4: Get By ID
+        const fetched = window.ScratchpadStorage.getById(newNote.id);
+        assert(fetched !== null && fetched.id === newNote.id, 'Fetched note matches added note');
+
+        // Test 5: Unique People List
+        const people = window.ScratchpadStorage.getUniquePeople();
+        assert(people.some(p => p.name === 'Rahul' && p.count >= 1), 'Rahul listed in unique people suggestions with count');
+        assert(people.some(p => p.name === 'Prof. Sharma'), 'Prof. Sharma listed in suggestions');
+
+        // Test 6: Update Note
+        const updated = window.ScratchpadStorage.updateNote(newNote.id, {
+          context: 'Physics Lab Room 204'
+        });
+        assert(updated.context === 'Physics Lab Room 204', 'Note context updated');
+
+        // Test 7: Toggle Resolved Status
+        const toggled = window.ScratchpadStorage.toggleResolved(newNote.id);
+        assert(toggled.isResolved === true, 'Note toggled to Resolved');
+        const toggledBack = window.ScratchpadStorage.toggleResolved(newNote.id);
+        assert(toggledBack.isResolved === false, 'Note toggled back to Active');
+
+        // Test 8: 1-Click Convert to To-Do Task
+        const convertRes = window.ScratchpadTaskConverter.convert(newNote.id, {
+          category: 'Daily chore',
+          dueDate: '2026-09-18'
+        });
+        assert(!!convertRes.task, 'Scheduled To-Do task created in task engine');
+        assert(convertRes.task.title === newNote.text, 'Task title matches scratchpad text');
+        assert(convertRes.task.sourceNoteId === newNote.id, 'Task is linked to sourceNoteId');
+        assert(convertRes.note.isResolved === true, 'Scratchpad note marked as Resolved after conversion');
+        assert(convertRes.note.convertedToTaskId === convertRes.task.id, 'Scratchpad note records convertedToTaskId: ' + convertRes.task.id);
+
+        // Verify task in TaskHabitEngine.todos
+        if (window.TaskHabitEngine && window.TaskHabitEngine.todos) {
+          const allTodos = window.TaskHabitEngine.todos.getAll();
+          assert(allTodos.some(t => t.id === convertRes.task.id), 'Task is confirmed present in TaskHabitEngine task list');
+        }
+
+        // Test 9: UI Component Mounting & Filtering
+        const mount = document.getElementById('mountPoint');
+        const ui = new window.SomebodyToldMeUI(mount, { enableFab: true });
+        assert(mount.innerHTML.includes('Somebody Told Me'), 'UI component renders header and cards');
+        assert(mount.innerHTML.includes('Rahul'), 'UI renders notes in list');
+        assert(mount.innerHTML.includes('Convert to To-Do') || mount.innerHTML.includes('In Task List'), 'UI renders Convert to To-Do button');
+
+        // Test 10: Filtering By Person
+        ui.selectedPerson = 'Rahul';
+        const filtered = ui.getFilteredNotes();
+        assert(filtered.every(n => n.person.toLowerCase() === 'rahul'), 'Person filter isolates notes from Rahul');
+
+        // Test 11: Live Search
+        ui.selectedPerson = 'all';
+        ui.searchQuery = 'quiz';
+        const searched = ui.getFilteredNotes();
+        assert(searched.some(n => n.text.toLowerCase().includes('quiz')), 'Search finds note containing "quiz"');
+
+        // Test 12: Delete Note
+        const deleted = window.ScratchpadStorage.deleteNote(newNote.id);
+        assert(deleted === true, 'Note deleted permanently');
+        assert(window.ScratchpadStorage.getById(newNote.id) === null, 'Note no longer exists in storage');
+
+        logs.push('\n==================================================');
+        logs.push('ALL 12 TESTS PASSED WITH 100% SUCCESS!');
+        logs.push('==================================================');
+
+        resultsDiv.innerHTML = '<span class="success">' + logs.join('\n') + '</span>';
+        window.__TEST_STATUS__ = 'SUCCESS';
+      } catch (err) {
+        logs.push('\nTEST FAILED: ' + err.message + '\n' + err.stack);
+        resultsDiv.innerHTML = '<span class="error">' + logs.join('\n') + '</span>';
+        window.__TEST_STATUS__ = 'FAILED: ' + err.message;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', runAllTests);
+  </script>
+</body>
+</html>

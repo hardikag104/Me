@@ -12,74 +12,24 @@
   <!-- PWA Manifest & Icons -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- Immediate Anti-FOUC Theme Restoration Script -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('me_theme') || 'midnight-slate';
+        const clean = saved.toLowerCase().includes('light') ? 'clean-luxury-light'
+          : saved.toLowerCase().includes('nord') ? 'nord-frost'
+          : saved.toLowerCase().includes('oled') ? 'oled-pitch-black'
+          : 'midnight-slate';
+        document.documentElement.setAttribute('data-theme', clean);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Modular Design System CSS (4 Themes, Typography, Components) -->
+  <link rel="stylesheet" href="css/design-system.css">
 
   <style>
-    /* ==========================================================================
-       THEME VARIABLES & MINIMALIST LUXURY DESIGN SYSTEM
-       ========================================================================== */
-    :root {
-      /* Backgrounds */
-      --bg-primary: #09090d;
-      --bg-surface: #12121a;
-      --bg-surface-elevated: #181824;
-      --bg-glass: rgba(18, 18, 26, 0.82);
-      --bg-header-glass: rgba(9, 9, 13, 0.88);
-
-      /* Backward compatibility for Agent 2, 3, 4 */
-      --bg: #09090d;
-      --card: #12121a;
-      --card-hover: #181824;
-      --text: #f3f4f8;
-      --text-dim: #9494a8;
-      --border: #1f1f2e;
-      --radius: 14px;
-
-      /* Borders */
-      --border-subtle: #1f1f2e;
-      --border-focus: #2f2f48;
-      --border-accent: #7c5cfc;
-
-      /* Accents */
-      --accent: #7c5cfc;
-      --accent-glow: rgba(124, 92, 252, 0.35);
-      --accent-dim: rgba(124, 92, 252, 0.12);
-      --accent-hover: #8e71ff;
-
-      --mint: #10b981;
-      --green: #10b981;
-      --green-dim: rgba(16, 185, 129, 0.15);
-      --mint-glow: rgba(16, 185, 129, 0.35);
-
-      --amber: #f59e0b;
-      --yellow: #f59e0b;
-      --yellow-dim: rgba(245, 158, 11, 0.15);
-
-      --rose: #ef4444;
-      --red: #ef4444;
-      --red-dim: rgba(239, 68, 68, 0.15);
-
-      --cyan: #06b6d4;
-      --cyan-dim: rgba(6, 182, 212, 0.15);
-
-      /* Typography */
-      --text-primary: #f3f4f8;
-      --text-secondary: #9494a8;
-      --text-muted: #5e5e76;
-
-      /* Radii */
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --radius-full: 9999px;
-
-      /* Layout */
-      --header-height: 60px;
-      --nav-height: 64px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
-      --max-width: 620px;
-    }
 
     /* Reset */
     *, *::before, *::after {
@@ -845,118 +795,9 @@
     }
 
     /* ==========================================================================
-       BOTTOM NAVIGATION DOCK
+       BOTTOM NAVIGATION DOCK & MODALS (Provided by css/design-system.css)
+       Floating Dock with Smooth Active Pills & Frosted Glass Overlays
        ========================================================================== */
-    .bottom-nav-dock {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--nav-height) + var(--safe-bottom));
-      padding-bottom: var(--safe-bottom);
-      background: var(--bg-header-glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      z-index: 50;
-    }
-
-    .nav-tab-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      height: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .nav-tab-btn .tab-icon {
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s;
-    }
-
-    .nav-tab-btn .tab-icon svg {
-      width: 100%;
-      height: 100%;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
-    }
-
-    .nav-tab-btn .tab-label {
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      margin-top: 3px;
-    }
-
-    .nav-tab-btn.active {
-      color: var(--mint);
-    }
-    .nav-tab-btn.active .tab-icon {
-      transform: translateY(-2px);
-    }
-    .nav-tab-btn.active::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      width: 32px;
-      height: 2px;
-      background: var(--mint);
-      box-shadow: 0 0 8px var(--mint);
-      border-radius: 2px;
-    }
-
-    /* ==========================================================================
-       MODALS & OVERLAYS STYLING
-       ========================================================================== */
-    .app-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      animation: fadeIn 0.2s ease;
-    }
-    .app-modal-overlay.open {
-      display: flex;
-    }
-
-    .app-modal-card {
-      width: 100%;
-      max-width: 480px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
-      position: relative;
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
 
     /* Agent 4: Lockdown & Emergency Reality Modals */
     .lockdown-overlay {
@@ -1317,6 +1158,11 @@
       <button class="action-icon-btn" id="btnOpenBackupModal" title="1-Click PC ↔ Android Backup" aria-label="Backup and restore">
         💾
       </button>
+
+      <!-- Theme Switcher Engine Button -->
+      <button class="action-icon-btn" id="btnThemeToggle" title="Switch Theme (Midnight Slate, Clean Luxury Light, Nord Frost, OLED Pitch Black)" aria-label="Switch Theme">
+        <span id="themeToggleIcon">🎨</span>
+      </button>
     </div>
   </header>
 
@@ -1420,39 +1266,14 @@
         <!-- Dynamically rendered -->
       </div>
 
-      <!-- Actionable Tasks with Categorization -->
-      <div class="ui-card-header" style="margin-top: 20px;">
-        <div class="ui-card-title"><span class="icon">🎯</span> Actionable Tasks</div>
+      <!-- Agent 4: Tasks & Exams Management Lead Component -->
+      <div id="tasksUiContainer">
+        <!-- TasksUIComponent mounts here -->
       </div>
 
-      <div class="todo-input-row">
-        <input type="text" id="inputNewTodo" placeholder="What needs doing?">
-        <select id="selectTodoCategory">
-          <option value="Daily chore">Chore</option>
-          <option value="Test/Exam">Test/Exam</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Urgent">Urgent</option>
-        </select>
-        <button class="btn-styled accent" id="btnAddTodo">+</button>
-      </div>
-
-      <div id="todoListContainer">
-        <!-- Dynamically rendered -->
-      </div>
-
-      <!-- Scratchpad: "Somebody Told Me" Quick Capture -->
-      <div class="scratchpad-box">
-        <div class="ui-card-header" style="margin-bottom: 8px;">
-          <div class="ui-card-title"><span class="icon">👂</span> Somebody Told Me (Quick Capture)</div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-          <input type="text" id="inputScratchPerson" placeholder="Who told you? (e.g. Mom, Prof, Friend)" style="width: 140px; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 0.8rem;">
-          <input type="text" id="inputScratchText" placeholder="What did they say / assign?" style="flex: 1; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 0.8rem;">
-          <button class="btn-styled sm mint" id="btnAddScratchNote">Save</button>
-        </div>
-        <div id="scratchNotesList">
-          <!-- Dynamically populated -->
-        </div>
+      <!-- Agent 6: 'Somebody Told Me' Quick Capture Scratchpad Specialist -->
+      <div id="scratchpadContainer" style="margin-top: 20px;">
+        <!-- SomebodyToldMeUI Component mounts here -->
       </div>
     </section>
 
@@ -1626,41 +1447,62 @@
       <button style="background: transparent; border: none; font-size: 1.4rem; color: var(--text-secondary); cursor: pointer;" id="btnCloseBackupModal">&times;</button>
     </div>
 
-    <div style="background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
-      <div><strong>Storage Engine:</strong> Client-Side LocalStorage (Private & Offline)</div>
+    <div style="background: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.6;">
+      <div><strong>Storage Engine:</strong> <span id="statStorageEngine">Client-Side LocalStorage (Private & Offline)</span></div>
       <div id="statStoredKeys">Stored Records: Calculating...</div>
       <div id="statPayloadSize">Payload Size: Calculating...</div>
-      <div style="margin-top: 4px; color: var(--text-primary);">Transfer all your habits, BITS attendance, and logs between PC and Android in 1 click.</div>
+      <div style="margin-top: 4px; color: var(--text-primary);">Transfer all your timetable, attendance, tasks, habits, food, sleep & theme between PC and Android in 1 click.</div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
       <button class="btn-styled accent" id="btnExportJsonFile" style="padding: 12px; flex-direction: column; height: auto;">
         <span style="font-size: 1.3rem;">📥</span>
-        <span>Download JSON</span>
-        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Save to Device</span>
+        <span style="font-weight: 800;">Export Backup (JSON)</span>
+        <span style="font-size: 0.65rem; opacity: 0.85; font-weight: normal;">me-life-os-backup-*.json</span>
       </button>
 
       <button class="btn-styled" id="btnTriggerImportFile" style="padding: 12px; flex-direction: column; height: auto;">
         <span style="font-size: 1.3rem;">📤</span>
-        <span>Import JSON</span>
-        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Pick .json File</span>
+        <span style="font-weight: 800;">Import Backup (JSON)</span>
+        <span style="font-size: 0.65rem; opacity: 0.85; font-weight: normal;">Pick .json File</span>
       </button>
       <input type="file" id="backupFileInput" accept=".json,application/json" style="display: none;">
+    </div>
 
-      <button class="btn-styled ghost" id="btnCopyJsonToClipboard" style="padding: 12px; flex-direction: column; height: auto;">
-        <span style="font-size: 1.3rem;">📋</span>
-        <span>Copy to Clipboard</span>
-        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Paste in Notes/Chat</span>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+      <button class="btn-styled ghost" id="btnCopyJsonToClipboard" style="padding: 10px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.2rem;">📋</span>
+        <span style="font-weight: 700;">Copy JSON</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">To Mobile / PC Clipboard</span>
       </button>
 
-      <button class="btn-styled ghost" id="btnLoadDemoData" style="padding: 12px; flex-direction: column; height: auto;">
-        <span style="font-size: 1.3rem;">⚡</span>
-        <span>Load Sample Data</span>
-        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Demo BITS & Habits</span>
+      <button class="btn-styled ghost" id="btnPasteJsonClipboard" style="padding: 10px; flex-direction: column; height: auto;">
+        <span style="font-size: 1.2rem;">📲</span>
+        <span style="font-weight: 700;">Paste JSON / Sync</span>
+        <span style="font-size: 0.65rem; opacity: 0.8; font-weight: normal;">Direct Clipboard Transfer</span>
       </button>
     </div>
 
-    <div style="display: flex; gap: 8px; margin-top: 10px;">
+    <!-- Direct JSON Text Transfer Drawer for Mobile & Instant Paste -->
+    <div id="pasteJsonSection" style="display: none; background: var(--bg-primary); border: 1px solid var(--accent); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <span style="font-size: 0.78rem; font-weight: 700; color: #c4b5fd;">📋 Direct JSON Sync (Mobile & PC)</span>
+        <button class="btn-styled ghost sm" id="btnClosePasteSection" style="padding: 2px 8px; font-size: 0.72rem;">✕ Close</button>
+      </div>
+      <p style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 6px;">Paste your backup JSON text below to sync between PC and Android without downloading files:</p>
+      <textarea id="directJsonInput" placeholder="Paste { ... } backup payload here..." style="width: 100%; height: 85px; font-family: monospace; font-size: 0.72rem; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px; resize: vertical;"></textarea>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button class="btn-styled accent sm" id="btnRestoreDirectJson" style="flex: 1; padding: 8px; font-weight: 700;">⚡ Restore Pasted Data</button>
+        <button class="btn-styled ghost sm" id="btnClearDirectJson" style="padding: 8px;">Clear</button>
+      </div>
+    </div>
+
+    <button class="btn-styled ghost" id="btnLoadDemoData" style="width: 100%; padding: 10px; margin-bottom: 10px; justify-content: center; font-size: 0.82rem;">
+      <span style="font-size: 1.1rem; margin-right: 6px;">⚡</span>
+      <span>Load Sample Demonstration Data</span>
+    </button>
+
+    <div style="display: flex; gap: 8px;">
       <button class="btn-styled ghost sm" style="flex: 1;" id="btnResetTodayProgress">↺ Reset Today</button>
       <button class="btn-styled ghost sm" style="flex: 1; color: var(--rose);" id="btnHardWipeStorage">⚠️ Factory Reset</button>
     </div>
@@ -1678,20 +1520,44 @@
 <!-- ==========================================================================
      SCRIPTS & AGENT GLUE ARCHITECTURE
      ========================================================================== -->
+<!-- Agent 1: Design System & Theme Engine -->
+<script src="js/theme-engine.js"></script>
+
 <!-- Agent 1: BITS Timetable Engine -->
 <script src="timetable.js"></script>
+
+<!-- Agent 3: Timetable & Attendance UI Lead -->
+<script src="ui-timetable.js"></script>
 
 <!-- Agent 2: Tasks, Chores & Habit Engine -->
 <script src="task-habit-engine.js"></script>
 
+<!-- Agent 4: Tasks & Exams UI Component -->
+<script src="ui-tasks.js"></script>
+
+<!-- Agent 6: 'Somebody Told Me' Quick Capture Scratchpad Specialist -->
+<script src="ui-scratchpad.js"></script>
+
+<!-- Agent 5: Dynamic Habit & Routine Engine -->
+<script src="ui-habits.js"></script>
+
 <!-- Agent 4: Sleep & Emotional Motivation Engine -->
 <script src="sleep-motivation.js"></script>
 
-<!-- Master Glue & Component Integration -->
-<script type="module">
-  // Import Agent 3's Food & Health Intelligence Component
-  import { FoodHealthUIComponent, FoodHealthStorage, DailyHealthScoreEngine } from './food-health.js';
+<!-- Agent 7: Sleep & Circadian Rhythm Engine -->
+<script src="ui-sleep.js"></script>
 
+<!-- Agent 9: Data Persistence, Backup & PWA Engine -->
+<script src="ui-storage-pwa.js"></script>
+
+<!-- Agent 8: Emotional Motivation & Reality Check System -->
+<script src="ui-motivation.js"></script>
+
+<!-- Agent 2: Food & Nutrition UI/UX Engine -->
+<script src="ui-food.js"></script>
+
+<!-- Master Glue & Component Integration -->
+<script>
   (function() {
     'use strict';
 
@@ -1714,6 +1580,9 @@
     }
 
     function getStorage(key, fallback = null) {
+      if (typeof window !== 'undefined' && window.MeStorage) {
+        return window.MeStorage.getItem(key, fallback);
+      }
       try {
         const val = localStorage.getItem(key);
         return val !== null ? JSON.parse(val) : fallback;
@@ -1723,6 +1592,9 @@
     }
 
     function setStorage(key, value) {
+      if (typeof window !== 'undefined' && window.MeStorage) {
+        return window.MeStorage.setItem(key, value);
+      }
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (e) {
@@ -1755,10 +1627,17 @@
 
         // Reality Check Quick Button
         document.getElementById('btnTriggerReality')?.addEventListener('click', () => {
-          if (window.SleepMotivationUI) {
+          if (window.MotivationUI) {
+            window.MotivationUI.openEmergencyMotivation('all');
+          } else if (window.SleepMotivationUI) {
             window.SleepMotivationUI.openEmergencyMotivation('all');
           }
         });
+
+        // Initialize Agent 8's Emotional Motivation & Reality Check System
+        if (window.MotivationUI && typeof window.MotivationUI.init === 'function') {
+          window.MotivationUI.init();
+        }
       },
 
       // Global Toast
@@ -1830,13 +1709,42 @@
         if (target) {
           target.classList.add('active');
           localStorage.setItem(ACTIVE_TAB_KEY, tabId);
+
+          // Agent 8: Refresh Tab Motivation Cards
+          if (tabId === 'tasks' && window.MotivationUI) {
+            window.MotivationUI.renderTasksCard();
+          } else if (tabId === 'sleep' && window.MotivationUI) {
+            window.MotivationUI.renderSleepCard();
+          } else if (tabId === 'food') {
+            if (this.foodComponent && typeof this.foodComponent.render === 'function') {
+              this.foodComponent.render();
+            } else {
+              this.setupFood();
+            }
+          }
         }
       },
 
       // ======================================================================
       // TAB 1: BITS PILANI TIMETABLE INTEGRATION (AGENT 1)
       // ======================================================================
+      // TAB 1: BITS PILANI TIMETABLE INTEGRATION (AGENT 3 LEAD)
+      // ======================================================================
       setupTimetable() {
+        try {
+          const tabContainer = document.getElementById('tab-timetable');
+          if (tabContainer && window.TimetableUIComponent) {
+            this.timetableComponent = new window.TimetableUIComponent(tabContainer, {
+              onAttendanceChange: () => this.calculateMasterScore(),
+              onToast: (msg, icon) => this.showToast(msg, icon)
+            });
+            this.timetableComponent.init();
+            return;
+          }
+        } catch (err) {
+          console.warn('[MeApp] TimetableUIComponent initialization failed, falling back:', err);
+        }
+
         const daySelector = document.getElementById('timetableDaySelector');
         const dayBtns = daySelector?.querySelectorAll('.bits-day-btn');
         const currentDayIndex = new Date().getDay();
@@ -1965,28 +1873,45 @@
       // TAB 2: TASKS & HABIT ENGINE (AGENT 2 INTEGRATION)
       // ======================================================================
       setupTasks() {
+        if (window.TasksUIComponent) {
+          this.tasksUi = new window.TasksUIComponent({
+            container: '#tasksUiContainer'
+          });
+        }
+        if (window.SomebodyToldMeUI) {
+          const scratchMount = document.getElementById('scratchpadContainer');
+          if (scratchMount) {
+            this.scratchpadUi = new window.SomebodyToldMeUI(scratchMount, {
+              enableFab: false,
+              onConvert: (res) => {
+                if (this.tasksUi && typeof this.tasksUi.render === 'function') {
+                  this.tasksUi.render();
+                }
+                this.renderTodos();
+                this.calculateMasterScore();
+              }
+            });
+          }
+        }
         this.renderHabits();
-        this.renderTodos();
         this.renderScratchpad();
-
-        document.getElementById('btnAddTodo')?.addEventListener('click', () => this.addTodo());
-        document.getElementById('inputNewTodo')?.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') this.addTodo();
-        });
-
-        document.getElementById('btnAddScratchNote')?.addEventListener('click', () => this.addScratchNote());
       },
 
       renderHabits() {
         const container = document.getElementById('habitsContainerList');
         if (!container) return;
 
+        if (window.HabitsUI && typeof window.HabitsUI.mount === 'function') {
+          window.HabitsUI.mount(container);
+          return;
+        }
+
         const today = getTodayString();
         let habits = [];
         let completedCount = 0;
 
         if (window.TaskHabitEngine) {
-          habits = window.TaskHabitEngine.habits.getHabitsForDate(today);
+          habits = window.TaskHabitEngine.habits.getHabitsForDate ? window.TaskHabitEngine.habits.getHabitsForDate(today) : [];
           completedCount = habits.filter(h => h.isCompleted).length;
 
           container.innerHTML = habits.map(h => {
@@ -2026,12 +1951,20 @@
       },
 
       toggleHabit(habitId) {
+        if (window.HabitsUI && typeof window.HabitsUI.toggleHabit === 'function') {
+          window.HabitsUI.toggleHabit(habitId);
+          this.calculateMasterScore();
+          return;
+        }
+
         const today = getTodayString();
         if (window.TaskHabitEngine) {
           const habit = window.TaskHabitEngine.habits.getHabitById(habitId);
-          const currentVal = window.TaskHabitEngine.habits.getHabitProgress(habitId, today);
+          const currentVal = window.TaskHabitEngine.habits.getHabitProgress ? window.TaskHabitEngine.habits.getHabitProgress(habitId, today) : 0;
           const newVal = currentVal > 0 ? 0 : 1;
-          window.TaskHabitEngine.habits.logCompletion(habitId, today, newVal);
+          if (window.TaskHabitEngine.habits.logCompletion) {
+            window.TaskHabitEngine.habits.logCompletion(habitId, today, newVal);
+          }
           this.renderHabits();
           this.calculateMasterScore();
           this.showToast(newVal > 0 ? 'Standard achieved!' : 'Standard unchecked');
@@ -2048,6 +1981,9 @@
       },
 
       renderTodos() {
+        if (this.tasksUi) {
+          this.tasksUi.refresh();
+        }
         const container = document.getElementById('todoListContainer');
         if (!container) return;
 
@@ -2155,6 +2091,11 @@
       },
 
       renderScratchpad() {
+        if (this.scratchpadUi && typeof this.scratchpadUi.render === 'function') {
+          this.scratchpadUi.render();
+          return;
+        }
+
         const list = document.getElementById('scratchNotesList');
         if (!list) return;
 
@@ -2199,24 +2140,34 @@
       },
 
       // ======================================================================
-      // TAB 3: FOOD & HEALTH (AGENT 3 INTEGRATION)
+      // TAB 3: FOOD & HEALTH (AGENT 2 FOOD & NUTRITION LEAD)
       // ======================================================================
       setupFood() {
         try {
           const container = document.getElementById('foodHealthContainer');
-          if (container && FoodHealthUIComponent) {
-            this.foodComponent = new FoodHealthUIComponent(container);
-            this.foodComponent.init();
+          if (container) {
+            if (typeof window.renderFoodTab === 'function') {
+              this.foodComponent = window.renderFoodTab(container);
+            } else if (typeof FoodHealthUIComponent !== 'undefined') {
+              this.foodComponent = new FoodHealthUIComponent(container);
+              this.foodComponent.init();
+            }
           }
         } catch (err) {
-          console.warn('FoodHealthUIComponent initialization:', err);
+          console.warn('Food UI Component initialization:', err);
         }
       },
 
       // ======================================================================
-      // TAB 4: SLEEP & EMOTIONAL MOTIVATION (AGENT 4 INTEGRATION)
+      // TAB 4: SLEEP & CIRCADIAN INTELLIGENCE (AGENT 7 INTEGRATION)
       // ======================================================================
       setupSleep() {
+        if (typeof window.SleepCircadianUI === 'function') {
+          this.sleepComponent = new window.SleepCircadianUI('#tab-sleep');
+          this.sleepComponent.init();
+          return;
+        }
+
         const bedInput = document.getElementById('sleepBedInput');
         const wakeInput = document.getElementById('sleepWakeInput');
         const starsRow = document.getElementById('sleepStarsRow');
@@ -2509,283 +2460,69 @@
       // 1-CLICK JSON BACKUP & PERSISTENCE ENGINE
       // ======================================================================
       setupBackupEngine() {
-        const modal = document.getElementById('backupSyncModal');
-        const openBtn = document.getElementById('btnOpenBackupModal');
-        const closeBtn = document.getElementById('btnCloseBackupModal');
-        const exportBtn = document.getElementById('btnExportJsonFile');
-        const importTrigger = document.getElementById('btnTriggerImportFile');
-        const fileInput = document.getElementById('backupFileInput');
-        const copyBtn = document.getElementById('btnCopyJsonToClipboard');
-        const demoBtn = document.getElementById('btnLoadDemoData');
-        const resetTodayBtn = document.getElementById('btnResetTodayProgress');
-        const factoryResetBtn = document.getElementById('btnHardWipeStorage');
-
-        openBtn?.addEventListener('click', () => {
-          this.refreshBackupStats();
-          modal?.classList.add('open');
-        });
-        closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
-        modal?.addEventListener('click', (e) => {
-          if (e.target === modal) modal.classList.remove('open');
-        });
-
-        exportBtn?.addEventListener('click', () => this.exportBackupJson());
-        importTrigger?.addEventListener('click', () => fileInput?.click());
-        fileInput?.addEventListener('change', (e) => this.handleFileImport(e));
-        copyBtn?.addEventListener('click', () => this.copyBackupClipboard());
-        demoBtn?.addEventListener('click', () => this.loadFullDemoData());
-        resetTodayBtn?.addEventListener('click', () => this.resetToday());
-        factoryResetBtn?.addEventListener('click', () => this.factoryReset());
+        if (window.MeBackup) {
+          window.MeBackup.init({
+            onRestore: () => {
+              this.renderTimetableClasses();
+              this.updateAttendanceAnalytics();
+              this.renderHabits();
+              this.renderTodos();
+              this.renderScratchpad();
+              if (this.foodComponent) this.foodComponent.render();
+              this.setupSleep();
+              this.calculateMasterScore();
+            },
+            showToast: (msg, icon) => this.showToast(msg, icon)
+          });
+        }
       },
 
       refreshBackupStats() {
-        let keyCount = 0;
-        let bytes = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('me_') || k.startsWith('lt_') || k.startsWith('bits_'))) {
-            keyCount++;
-            bytes += (localStorage.getItem(k) || '').length * 2;
-          }
-        }
-        document.getElementById('statStoredKeys').textContent = `Stored Records: ${keyCount} keys`;
-        document.getElementById('statPayloadSize').textContent = `Payload Size: ${(bytes / 1024).toFixed(2)} KB`;
+        if (window.MeBackup) return window.MeBackup.refreshStatsUI();
       },
 
       generatePayload() {
-        const dump = {};
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('me_') || k.startsWith('lt_') || k.startsWith('bits_'))) {
-            try {
-              dump[k] = JSON.parse(localStorage.getItem(k));
-            } catch {
-              dump[k] = localStorage.getItem(k);
-            }
-          }
-        }
-
-        return {
-          app: 'Me PWA — Minimalist Life OS',
-          version: '2.0.0',
-          exportedAt: new Date().toISOString(),
-          recordCount: Object.keys(dump).length,
-          storage: dump
-        };
+        if (window.MeBackup) return window.MeBackup.generatePayload();
+        return {};
       },
 
       exportBackupJson() {
-        const payload = this.generatePayload();
-        const str = JSON.stringify(payload, null, 2);
-        const blob = new Blob([str], { type: 'application/json' });
-        const filename = `me-backup-${getTodayString()}.json`;
-
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-
-        this.showToast('Backup saved! Transfer to PC or Android phone.');
+        if (window.MeBackup) return window.MeBackup.exportBackupJson();
       },
 
       copyBackupClipboard() {
-        const payload = this.generatePayload();
-        navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).then(() => {
-          this.showToast('JSON copied to clipboard!');
-        }).catch(() => {
-          this.showToast('Failed to copy to clipboard', '⚠️');
-        });
+        if (window.MeBackup) return window.MeBackup.copyBackupClipboard();
       },
 
       handleFileImport(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const parsed = JSON.parse(evt.target.result);
-            this.restorePayload(parsed);
-          } catch (err) {
-            alert('Invalid backup JSON file.');
-          }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
+        if (window.MeBackup) return window.MeBackup.handleFileInput(e);
       },
 
       restorePayload(payload) {
-        if (!payload || !payload.storage) {
-          alert('Invalid backup structure.');
-          return;
-        }
-
-        if (!confirm(`Restore ${Object.keys(payload.storage).length} records from backup dated ${payload.exportedAt || 'Unknown'}? This merges and updates current data.`)) {
-          return;
-        }
-
-        Object.entries(payload.storage).forEach(([k, v]) => {
-          try {
-            localStorage.setItem(k, JSON.stringify(v));
-          } catch (e) {
-            console.warn(e);
-          }
-        });
-
-        document.getElementById('backupSyncModal')?.classList.remove('open');
-        this.showToast('Data restored successfully!');
-
-        // Live refresh views
-        this.renderTimetableClasses();
-        this.updateAttendanceAnalytics();
-        this.renderHabits();
-        this.renderTodos();
-        this.renderScratchpad();
-        if (this.foodComponent) this.foodComponent.render();
-        this.setupSleep();
-        this.calculateMasterScore();
+        if (window.MeBackup) return window.MeBackup.restorePayload(payload);
       },
 
       loadFullDemoData() {
-        if (!confirm('Load sample demonstration data? This fills today with BITS classes, habits, meals, and sleep.')) return;
-
-        const today = getTodayString();
-
-        // Habits
-        const habits = {
-          sleep_early: true,
-          wake_early: true,
-          water_target: true,
-          healthy_meal: true,
-          no_junk: true,
-          workout: true,
-          deep_work: true,
-          no_doomscroll: false,
-          learn: true
-        };
-        setStorage(`me_${today}_habits`, habits);
-        setStorage(`lt_${today}_habits`, habits);
-
-        // Sleep
-        const sleep = { bed: '22:45', wake: '06:30', quality: '5' };
-        setStorage(`me_${today}_sleep`, sleep);
-        setStorage(`lt_${today}_sleep`, sleep);
-
-        // Reflection
-        const reflection = 'Crushed 3 hours of focused system design. Hydration on point. Ready to conquer tomorrow.';
-        setStorage(`me_${today}_journal`, reflection);
-        setStorage(`lt_${today}_journal`, reflection);
-
-        // Attendance sample for BITS
-        if (window.BITS_TIMETABLE) {
-          const schedule = window.BITS_TIMETABLE.getDailySchedule(new Date());
-          if (schedule.classes && schedule.classes.length > 0) {
-            window.BITS_TIMETABLE.markAttendance(today, schedule.classes[0].id, 'present');
-          }
-        }
-
-        document.getElementById('backupSyncModal')?.classList.remove('open');
-        this.showToast('Sample data loaded!');
-
-        this.renderTimetableClasses();
-        this.updateAttendanceAnalytics();
-        this.renderHabits();
-        this.renderTodos();
-        this.setupSleep();
-        this.calculateMasterScore();
+        if (window.MeBackup) return window.MeBackup.loadDemoData();
       },
 
       resetToday() {
-        if (!confirm("Reset today's logged data?")) return;
-        const today = getTodayString();
-        const keys = [`me_${today}_habits`, `me_${today}_todos`, `me_${today}_sleep`, `me_${today}_journal`, `lt_${today}_habits`, `lt_${today}_sleep`, `lt_${today}_journal`];
-        keys.forEach(k => localStorage.removeItem(k));
-        location.reload();
+        if (window.MeBackup) return window.MeBackup.resetToday();
       },
 
       factoryReset() {
-        if (!confirm('⚠️ Factory reset will wipe all storage keys across all dates. Continue?')) return;
-        if (!confirm('Are you 100% sure? This cannot be undone.')) return;
-        localStorage.clear();
-        location.reload();
+        if (window.MeBackup) return window.MeBackup.factoryReset();
       },
 
       // ======================================================================
       // PWA INTEGRATION: SW REGISTRATION, OFFLINE HANDLING, INSTALL BANNER
       // ======================================================================
       setupPwa() {
-        // Register ServiceWorker
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-              .then(reg => console.log('Me PWA SW registered:', reg.scope))
-              .catch(err => console.warn('Me PWA SW failed:', err));
+        if (window.MePWA) {
+          window.MePWA.init({
+            showToast: (msg, icon) => this.showToast(msg, icon)
           });
         }
-
-        // Offline Status
-        const bannerOffline = document.getElementById('bannerOffline');
-        const updateOnline = () => {
-          if (!navigator.onLine) {
-            bannerOffline?.classList.add('show');
-            this.showToast('Working offline (Local database)', '⚡');
-          } else {
-            bannerOffline?.classList.remove('show');
-            this.showToast('Back online — Sync ready');
-          }
-        };
-
-        window.addEventListener('online', updateOnline);
-        window.addEventListener('offline', updateOnline);
-        if (!navigator.onLine) bannerOffline?.classList.add('show');
-
-        // PWA Install Prompt
-        let deferredPrompt = null;
-        const headerBtn = document.getElementById('btnHeaderInstall');
-        const bannerInstall = document.getElementById('bannerInstallPwa');
-        const btnPromptInstall = document.getElementById('btnPwaPromptInstall');
-        const btnPromptDismiss = document.getElementById('btnPwaPromptDismiss');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-
-          headerBtn?.classList.add('visible');
-
-          if (!sessionStorage.getItem('pwa_install_dismissed')) {
-            bannerInstall?.classList.add('show');
-          }
-        });
-
-        const triggerInstall = () => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choice) => {
-              if (choice.outcome === 'accepted') {
-                this.showToast('Me OS installed! 🎉');
-              }
-              deferredPrompt = null;
-              bannerInstall?.classList.remove('show');
-              headerBtn?.classList.remove('visible');
-            });
-          }
-        };
-
-        headerBtn?.addEventListener('click', triggerInstall);
-        btnPromptInstall?.addEventListener('click', triggerInstall);
-        btnPromptDismiss?.addEventListener('click', () => {
-          bannerInstall?.classList.remove('show');
-          sessionStorage.setItem('pwa_install_dismissed', '1');
-        });
-
-        window.addEventListener('appinstalled', () => {
-          this.showToast('Me OS added to home screen! 🚀');
-          bannerInstall?.classList.remove('show');
-          headerBtn?.classList.remove('visible');
-        });
       }
     };
 
@@ -2816,7 +2553,14 @@
         MeApp.deleteTodo(id);
       },
       convertScratchToTask(id) {
-        if (window.TaskHabitEngine) {
+        if (window.ScratchpadTaskConverter) {
+          window.ScratchpadTaskConverter.convert(id);
+          MeApp.renderTodos();
+          if (MeApp.tasksUi && typeof MeApp.tasksUi.render === 'function') {
+            MeApp.tasksUi.render();
+          }
+          MeApp.renderScratchpad();
+        } else if (window.TaskHabitEngine) {
           window.TaskHabitEngine.scratchpad.convertToTodo(id);
           MeApp.renderTodos();
           MeApp.renderScratchpad();
@@ -2824,7 +2568,10 @@
         }
       },
       deleteScratchNote(id) {
-        if (window.TaskHabitEngine) {
+        if (window.ScratchpadStorage) {
+          window.ScratchpadStorage.deleteNote(id);
+          MeApp.renderScratchpad();
+        } else if (window.TaskHabitEngine) {
           window.TaskHabitEngine.scratchpad.deleteNote(id);
           MeApp.renderScratchpad();
         }

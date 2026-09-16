@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tasks & Exams UI Automated Test Runner</title>
+  <style>
+    body {
+      background: #09090d;
+      color: #f3f4f8;
+      font-family: monospace;
+      padding: 20px;
+    }
+    .pass { color: #10b981; font-weight: bold; }
+    .fail { color: #ef4444; font-weight: bold; }
+    .summary { font-size: 1.2rem; margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Tasks & Exams UI Test Suite</h2>
+  <div id="testMount" style="opacity: 0.01; height: 10px; overflow: hidden;"></div>
+  <div id="testOutput">Running tests...</div>
+
+  <script src="task-habit-engine.js"></script>
+  <script src="ui-tasks.js"></script>
+  <script>
+    const out = document.getElementById('testOutput');
+    const logs = [];
+    let passed = 0;
+    let failed = 0;
+
+    function assert(condition, message) {
+      if (condition) {
+        passed++;
+        logs.push(`<div class="pass">✓ PASS: ${message}</div>`);
+      } else {
+        failed++;
+        logs.push(`<div class="fail">✗ FAIL: ${message}</div>`);
+      }
+    }
+
+    async function runSuite() {
+      try {
+        // Reset localStorage for clean test
+        localStorage.removeItem('me_tasks_todos');
+        if (window.TaskHabitEngine) {
+          window.TaskHabitEngine.resetAll();
+        }
+
+        const comp = new window.TasksUIComponent({
+          container: '#testMount'
+        });
+
+        assert(comp !== null, 'TasksUIComponent successfully instantiated');
+        assert(document.getElementById('ui-tasks-styles') !== null, 'Scoped CSS styles injected');
+
+        // Test 1: Category Segmented Controls
+        const segmentBtns = comp.container.querySelectorAll('.tasks-segment-btn');
+        assert(segmentBtns.length === 5, 'Found 5 category segment buttons (All, Exams, Meetings, Chores, Urgent)');
+
+        // Test Exams segment
+        const examsBtn = comp.container.querySelector('.tasks-segment-btn[data-cat="exams"]');
+        assert(examsBtn !== null, 'Found Exams segment button');
+        examsBtn.click();
+        assert(comp.activeCategory === 'exams', 'Active category switched to exams');
+
+        const examCards = comp.container.querySelectorAll('.task-card');
+        assert(examCards.length >= 1, 'Exams segment displays exam tasks');
+        const examCardTitle = comp.container.querySelector('.task-card .task-card-title').textContent;
+        assert(examCardTitle.includes('Exam') || examCardTitle.includes('Quiz'), 'Exam card title matches test/exam');
+
+        // Test Countdown Badge
+        const countdownBadge = comp.container.querySelector('.task-countdown-badge');
+        assert(countdownBadge !== null, 'Countdown badge rendered on exam task card');
+        const badgeText = countdownBadge.textContent.trim();
+        assert(badgeText.includes('In') || badgeText.includes('Tomorrow') || badgeText.includes('Today') || badgeText.includes('week') || badgeText.includes('Overdue'),
+          `Prominent countdown badge text valid: "${badgeText}"`);
+
+        // Test 2: Task Card Structure
+        const card = comp.container.querySelector('.task-card');
+        assert(card.querySelector('.task-checkbox-btn') !== null, 'Task card contains micro-animated checkbox');
+        assert(card.querySelector('.task-cat-pill') !== null, 'Task card contains category pill');
+        assert(card.querySelector('.task-priority-tag') !== null, 'Task card contains priority tag');
+        assert(card.querySelector('[data-action="edit"]') !== null, 'Task card contains Edit button');
+        assert(card.querySelector('[data-action="delete"]') !== null, 'Task card contains Delete button');
+
+        // Test 3: Checkbox Toggle & Micro-animation
+        const checkbox = card.querySelector('.task-checkbox-btn');
+        const taskId = checkbox.getAttribute('data-id');
+        const wasChecked = checkbox.classList.contains('checked');
+        checkbox.click();
+        assert(checkbox.classList.contains('checked') !== wasChecked, 'Checkbox toggled checked class immediately');
+
+        // Test 4: Quick Add Modal
+        const addBtn = comp.container.querySelector('#btnTriggerQuickAdd');
+        assert(addBtn !== null, 'Quick Add trigger button exists');
+        addBtn.click();
+
+        const modalOverlay = comp.container.querySelector('#taskModalOverlay');
+        assert(modalOverlay.classList.contains('open'), 'Modal overlay opened on trigger click');
+
+        const titleInput = comp.container.querySelector('#taskModalInputTitle');
+        titleInput.value = 'Automated Test Lab Exam';
+
+        const submitBtn = comp.container.querySelector('#btnSubmitTaskModal');
+        comp.saveTaskFromModal();
+
+        const currentOverlay = comp.container.querySelector('#taskModalOverlay');
+        assert(currentOverlay && !currentOverlay.classList.contains('open'), 'Modal closed after saving task');
+
+        // Switch to All Tasks and verify task was added
+        comp.activeCategory = 'all';
+        comp.render();
+        const allTitles = Array.from(comp.container.querySelectorAll('.task-card-title')).map(el => el.textContent);
+        assert(allTitles.some(t => t.includes('Automated Test Lab Exam')), 'Newly added task is rendered in the list');
+
+        // Test 5: Stats Bar
+        const stats = comp.calculateStats();
+        assert(typeof stats.total === 'number' && stats.total > 0, `Stats bar calculates total tasks: ${stats.total}`);
+        assert(typeof stats.pendingExams === 'number', `Stats bar calculates pending exams: ${stats.pendingExams}`);
+        assert(typeof stats.completedToday === 'number', `Stats bar calculates completed today: ${stats.completedToday}`);
+
+        const statCards = comp.container.querySelectorAll('.tasks-stat-card');
+        assert(statCards.length === 3, 'Rendered 3 metric stat cards (Total, Completed, Exams)');
+
+        // Summary
+        logs.push(`<div class="summary">Tests Finished: <span class="pass">${passed} Passed</span>, <span class="fail">${failed} Failed</span></div>`);
+      } catch (err) {
+        failed++;
+        logs.push(`<div class="fail">EXCEPTION: ${err.message}\n${err.stack}</div>`);
+      }
+
+      out.innerHTML = logs.join('');
+      window.__TEST_RESULTS__ = { passed, failed, logs };
+    }
+
+    document.addEventListener('DOMContentLoaded', runSuite);
+  </script>
+</body>
+</html>

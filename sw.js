@@ -1,4 +1,4 @@
-const CACHE_NAME = 'me-pwa-v5';
+const CACHE_NAME = 'me-pwa-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -6,9 +6,14 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './timetable.js',
+  './ui-timetable.js',
   './task-habit-engine.js',
   './sleep-motivation.js',
-  './food-health.js'
+  './food-health.js',
+  './ui-food.js',
+  './ui-habits.js',
+  './ui-storage-pwa.js',
+  './ui-motivation.js'
 ];
 
 self.addEventListener('install', event => {

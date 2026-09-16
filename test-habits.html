@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Recurring Habits & Routine Engine — Unit & UI Tests</title>
+  <style>
+    body {
+      background: #09090d;
+      color: #f3f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 { color: #7c5cfc; margin-bottom: 8px; font-size: 1.5rem; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+    .status-pass { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .status-fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+    #log-container {
+      background: #12121a;
+      border: 1px solid #1f1f2e;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.82rem;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .log-pass { color: #10b981; }
+    .log-fail { color: #ef4444; font-weight: bold; }
+    .log-info { color: #9494a8; }
+    .log-header { color: #c4b5fd; font-weight: bold; margin-top: 10px; }
+    #testMountContainer {
+      margin-top: 24px;
+      max-width: 600px;
+      border: 1px solid #2f2f48;
+      border-radius: 14px;
+      padding: 16px;
+      background: #09090d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Agent 5: Recurring Habits & Routine Engine Tests</h1>
+  <div id="testStatus" class="status-badge status-pass">Running Test Suite...</div>
+  <div id="log-container"></div>
+
+  <!-- Live UI Mount Target for DOM Verification -->
+  <h2 style="font-size: 1.1rem; margin-top: 24px; color: #a78bfa;">Live Mounted UI Component:</h2>
+  <div id="testMountContainer">
+    <div id="habitsContainerList"></div>
+  </div>
+
+  <script src="ui-habits.js"></script>
+  <script>
+    const logs = [];
+    const logContainer = document.getElementById('log-container');
+    const statusBadge = document.getElementById('testStatus');
+    let hasFailures = false;
+
+    function log(msg, type = 'info') {
+      const line = document.createElement('div');
+      line.className = 'log-' + type;
+      line.textContent = msg;
+      logContainer.appendChild(line);
+      logs.push(msg);
+      console.log(msg);
+    }
+
+    function assert(condition, message) {
+      if (condition) {
+        log('  ✓ PASS: ' + message, 'pass');
+      } else {
+        log('  ✗ FAIL: ' + message, 'fail');
+        hasFailures = true;
+      }
+    }
+
+    function runTests() {
+      try {
+        log('=== RECURRING HABITS & ROUTINE ENGINE TEST SUITE ===', 'header');
+
+        const engine = window.RecurringHabitsEngine;
+        const ui = window.HabitsUI;
+
+        assert(!!engine, 'RecurringHabitsEngine is exposed on global window');
+        assert(!!ui, 'HabitsUI is exposed on global window');
+
+        // Reset storage to pristine pre-seeded defaults
+        engine.restorePreSeededDefaults();
+
+        // ----------------------------------------------------------------------
+        // 1. PRE-SEEDED HABITS VERIFICATION
+        // ----------------------------------------------------------------------
+        log('\n--- 1. Pre-seeded Habits Verification ---', 'header');
+        const habits = engine.getHabits(true);
+        assert(habits.length >= 3, `Pre-seeded habits loaded (count = ${habits.length})`);
+
+        // 1.1 'Oil Hair'
+        const oilHair = habits.find(h => h.name === 'Oil Hair');
+        assert(!!oilHair, 'Pre-seeded habit "Oil Hair" exists');
+        assert(oilHair.icon === '🧴', '"Oil Hair" icon is 🧴');
+        assert(oilHair.category.toLowerCase() === 'grooming', '"Oil Hair" category is Grooming');
+        assert(oilHair.frequency === 'custom_days', '"Oil Hair" frequency is custom_days');
+        assert(Array.isArray(oilHair.daysOfWeek) && oilHair.daysOfWeek.includes(0) && oilHair.daysOfWeek.includes(3),
+          '"Oil Hair" is scheduled on Sunday (0) & Wednesday (3)');
+        assert(oilHair.timeOfDay === 'night', '"Oil Hair" time of day is night');
+        assert(oilHair.isActive === true, '"Oil Hair" is active by default');
+
+        // 1.2 'Eat Dry Fruits'
+        const dryFruits = habits.find(h => h.name === 'Eat Dry Fruits');
+        assert(!!dryFruits, 'Pre-seeded habit "Eat Dry Fruits" exists');
+        assert(dryFruits.icon === '🥜', '"Eat Dry Fruits" icon is 🥜');
+        assert(dryFruits.category.toLowerCase() === 'nutrition', '"Eat Dry Fruits" category is Nutrition');
+        assert(dryFruits.frequency === 'daily', '"Eat Dry Fruits" frequency is daily');
+        assert(dryFruits.timeOfDay === 'morning', '"Eat Dry Fruits" time of day is morning');
+
+        // 1.3 'Drink 3L Water'
+        const water3L = habits.find(h => h.name === 'Drink 3L Water');
+        assert(!!water3L, 'Pre-seeded habit "Drink 3L Water" exists');
+        assert(water3L.icon === '💧', '"Drink 3L Water" icon is 💧');
+        assert(water3L.category.toLowerCase() === 'hydration', '"Drink 3L Water" category is Hydration');
+        assert(water3L.frequency === 'daily', '"Drink 3L Water" frequency is daily');
+        assert(water3L.targetValue === 3 && water3L.unit.toLowerCase() === 'liters', '"Drink 3L Water" target is 3 Liters');
+
+        // ----------------------------------------------------------------------
+        // 2. FULL DYNAMIC CUSTOMIZATION: ADD, EDIT, PAUSE, DELETE
+        // ----------------------------------------------------------------------
+        log('\n--- 2. Full Dynamic Customization ---', 'header');
+
+        // 2.1 ADD new custom habit
+        const newHabit = engine.addHabit({
+          name: 'Cold Shower Protocol',
+          icon: '🚿',
+          category: 'Discipline',
+          frequency: 'weekdays',
+          timeOfDay: 'morning',
+          targetValue: 1,
+          unit: 'times',
+          description: '2 minutes ice cold water burst upon waking'
+        });
+        assert(!!newHabit.id, 'User can ADD custom habit with generated ID');
+        assert(newHabit.name === 'Cold Shower Protocol', 'Custom habit name stored correctly');
+        assert(newHabit.category === 'Discipline', 'Custom habit category stored correctly');
+        assert(newHabit.frequency === 'weekdays', 'Custom habit frequency is weekdays');
+        assert(newHabit.daysOfWeek.length === 5, 'Weekdays frequency mapped to Mon-Fri (5 days)');
+
+        // 2.2 EDIT habit
+        const edited = engine.editHabit(newHabit.id, {
+          name: 'Cold Shower Protocol (3 mins)',
+          targetValue: 2,
+          unit: 'bursts'
+        });
+        assert(edited.name === 'Cold Shower Protocol (3 mins)', 'Habit name successfully EDITed');
+        assert(edited.targetValue === 2 && edited.unit === 'bursts', 'Habit targetValue & unit EDITed');
+        assert(engine.getHabitById(newHabit.id).name === 'Cold Shower Protocol (3 mins)', 'Edited habit persisted in storage');
+
+        // 2.3 PAUSE / RESUME habit
+        const isNowActive = engine.togglePauseHabit(newHabit.id);
+        assert(isNowActive === false, 'Habit successfully PAUSED (isActive = false)');
+        assert(engine.getHabitById(newHabit.id).isActive === false, 'Paused habit reflected in storage');
+        assert(engine.isHabitScheduledForDate(engine.getHabitById(newHabit.id), '2026-09-17') === false,
+          'Paused habit is NOT scheduled on any day (does not count against daily completion rate)');
+
+        const resumedActive = engine.togglePauseHabit(newHabit.id);
+        assert(resumedActive === true, 'Habit successfully RESUMED (isActive = true)');
+
+        // 2.4 DELETE habit
+        const deleted = engine.deleteHabit(newHabit.id);
+        assert(deleted === true, 'Habit successfully DELETED');
+        assert(engine.getHabitById(newHabit.id) === null, 'Deleted habit is completely removed from storage');
+
+        // ----------------------------------------------------------------------
+        // 3. HABIT CARDS & SMART STREAK LOGIC
+        // ----------------------------------------------------------------------
+        log('\n--- 3. Habit Cards & Smart Streak Logic ---', 'header');
+
+        // 3.1 Frequency Pill Text
+        assert(engine.getFrequencyPillText(oilHair) === 'Wed, Sun', 'Frequency pill for Oil Hair is "Wed, Sun"');
+        assert(engine.getFrequencyPillText(dryFruits) === 'Daily', 'Frequency pill for Dry Fruits is "Daily"');
+        assert(engine.getFrequencyPillText(water3L) === 'Daily', 'Frequency pill for Water 3L is "Daily"');
+
+        // 3.2 Check-off circle toggle
+        const todayStr = '2026-09-17'; // Thursday
+        const toggleRes1 = engine.toggleHabitCompletion(dryFruits.id, todayStr);
+        assert(toggleRes1.completed === true, 'Habit toggled to COMPLETED (check-off circle checked)');
+        assert(engine.isHabitCompletedOnDate(dryFruits.id, todayStr) === true, 'Completion status confirmed');
+
+        const toggleRes2 = engine.toggleHabitCompletion(dryFruits.id, todayStr);
+        assert(toggleRes2.completed === false, 'Habit toggled back to INCOMPLETE (un-checked)');
+        assert(engine.isHabitCompletedOnDate(dryFruits.id, todayStr) === false, 'Incomplete status confirmed');
+
+        // 3.3 Numerical Progress Logging (e.g. 3L Water)
+        engine.logHabitProgress(water3L.id, 1.5, todayStr);
+        assert(engine.getHabitProgress(water3L.id, todayStr) === 1.5, 'Water progress logged at 1.5L');
+        assert(engine.isHabitCompletedOnDate(water3L.id, todayStr) === false, '1.5L is NOT completed for 3.0L target');
+
+        engine.logHabitProgress(water3L.id, 3.0, todayStr);
+        assert(engine.getHabitProgress(water3L.id, todayStr) === 3.0, 'Water progress logged at 3.0L');
+        assert(engine.isHabitCompletedOnDate(water3L.id, todayStr) === true, 'Reaching 3.0L target marks habit completed automatically');
+
+        // 3.4 SMART STREAK LOGIC: Non-scheduled days do NOT break streak!
+        log('\n--- Smart Streak Logic Verification ---', 'info');
+        // Let's test "Oil Hair" (Scheduled on Sunday=0 and Wednesday=3)
+        // Set completions on Sunday 2026-09-13 and Wednesday 2026-09-16
+        const testLogs = {};
+        testLogs['2026-09-13'] = { [oilHair.id]: { completed: true } }; // Sunday
+        testLogs['2026-09-16'] = { [oilHair.id]: { completed: true } }; // Wednesday
+        engine.storage.set('me_tasks_habit_logs', testLogs);
+
+        // Check on Thursday 2026-09-17 (Non-scheduled day):
+        const streakThu = engine.getHabitStreak(oilHair.id, '2026-09-17');
+        assert(streakThu.currentStreak === 2,
+          'Smart streak: Thursday (non-scheduled day) does NOT break streak! Streak = 2');
+
+        // Check on Friday 2026-09-18 (Non-scheduled day):
+        const streakFri = engine.getHabitStreak(oilHair.id, '2026-09-18');
+        assert(streakFri.currentStreak === 2,
+          'Smart streak: Friday (non-scheduled day) does NOT break streak! Streak = 2');
+
+        // Check on Saturday 2026-09-19 (Non-scheduled day):
+        const streakSat = engine.getHabitStreak(oilHair.id, '2026-09-19');
+        assert(streakSat.currentStreak === 2,
+          'Smart streak: Saturday (non-scheduled day) does NOT break streak! Streak = 2');
+
+        // Check on Sunday 2026-09-20 Morning (Scheduled day, not yet completed today):
+        const streakSunMorning = engine.getHabitStreak(oilHair.id, '2026-09-20');
+        assert(streakSunMorning.currentStreak === 2,
+          'Smart streak: Active scheduled day grace period preserves streak = 2 until midnight');
+
+        // Check on Sunday 2026-09-20 Completed:
+        testLogs['2026-09-20'] = { [oilHair.id]: { completed: true } }; // Sunday completed!
+        engine.storage.set('me_tasks_habit_logs', testLogs);
+        const streakSunDone = engine.getHabitStreak(oilHair.id, '2026-09-20');
+        assert(streakSunDone.currentStreak === 3,
+          'Smart streak: Checking off on scheduled Sunday increments streak to 3');
+
+        // Monday 2026-09-21 (Non-scheduled day, Sunday was completed):
+        const streakMonDone = engine.getHabitStreak(oilHair.id, '2026-09-21');
+        assert(streakMonDone.currentStreak === 3,
+          'Smart streak: Monday preserves streak of 3 after Sunday completion');
+
+        // What if Sunday was MISSED and Monday arrives?
+        delete testLogs['2026-09-20']; // Remove Sunday completion
+        engine.storage.set('me_tasks_habit_logs', testLogs);
+        const streakMonMissed = engine.getHabitStreak(oilHair.id, '2026-09-21');
+        assert(streakMonMissed.currentStreak === 0,
+          'Smart streak: Missed scheduled Sunday correctly resets streak to 0 on Monday');
+
+        // ----------------------------------------------------------------------
+        // 4. WEEKLY MINI-HEATMAP VERIFICATION
+        // ----------------------------------------------------------------------
+        log('\n--- 4. Weekly Mini-Heatmap Verification ---', 'header');
+
+        const heatmap = engine.getWeeklyHeatmap('2026-09-17');
+        assert(heatmap.days.length === 7, `Mini-heatmap returns exactly 7 days (length = ${heatmap.days.length})`);
+        assert(heatmap.days[6].isToday === true, 'Day 7 in heatmap is marked as Today');
+        assert(typeof heatmap.weeklyAverage === 'number', `Weekly consistency average calculated: ${heatmap.weeklyAverage}%`);
+
+        // Check that each day has completion rate 0 - 100%
+        const allValidRates = heatmap.days.every(d => d.rate >= 0 && d.rate <= 100);
+        assert(allValidRates, 'All 7 days have completion rate between 0% and 100%');
+
+        // ----------------------------------------------------------------------
+        // 5. DOM UI RENDERING & EVENT INTEGRATION
+        // ----------------------------------------------------------------------
+        log('\n--- 5. DOM UI Rendering Verification ---', 'header');
+
+        const mountContainer = document.getElementById('habitsContainerList');
+        ui.mount(mountContainer);
+
+        const renderedRoot = mountContainer.querySelector('.habit-engine-root');
+        assert(!!renderedRoot, 'Habits UI component successfully mounted into DOM container');
+
+        // Heatmap rendering
+        const heatCards = mountContainer.querySelectorAll('.habit-heat-col');
+        assert(heatCards.length === 7, `Heatmap rendered exactly 7 day columns in DOM (found = ${heatCards.length})`);
+
+        // Toolbar
+        const filterChips = mountContainer.querySelectorAll('.habit-chip');
+        assert(filterChips.length >= 4, `Filter chips rendered (All, Due Today, Morning, Night, Paused)`);
+
+        const addBtn = mountContainer.querySelector('#btnOpenAddHabit');
+        assert(!!addBtn, '+ New Habit button rendered in toolbar');
+
+        // Habit cards
+        const habitCards = mountContainer.querySelectorAll('.habit-card');
+        assert(habitCards.length >= 3, `Pre-seeded habit cards rendered in DOM (count = ${habitCards.length})`);
+
+        // Flame streak badges in DOM
+        const streakBadges = mountContainer.querySelectorAll('.habit-streak-badge');
+        assert(streakBadges.length >= 3, 'Flame streak badges rendered on all habit cards');
+
+        // Frequency pills in DOM
+        const freqPills = mountContainer.querySelectorAll('.habit-pill.frequency');
+        assert(freqPills.length >= 3, 'Frequency pills rendered on habit cards');
+
+        // Check buttons
+        const checkBtns = mountContainer.querySelectorAll('.habit-check-button');
+        assert(checkBtns.length >= 3, 'Check-off circles rendered on all cards');
+
+        // ----------------------------------------------------------------------
+        // FINAL SUMMARY
+        // ----------------------------------------------------------------------
+        if (!hasFailures) {
+          statusBadge.className = 'status-badge status-pass';
+          statusBadge.textContent = 'ALL TESTS PASSED (100% ERROR-FREE)';
+          log('\n🎉 ALL RECURRING HABITS SUITE TESTS PASSED ERROR-FREE!', 'pass');
+        } else {
+          statusBadge.className = 'status-badge status-fail';
+          statusBadge.textContent = 'TESTS FAILED — SEE LOGS';
+          log('\n⚠️ Some assertions failed. Review log above.', 'fail');
+        }
+
+      } catch (err) {
+        log('FATAL EXCEPTION: ' + err.message + '\n' + err.stack, 'fail');
+        statusBadge.className = 'status-badge status-fail';
+        statusBadge.textContent = 'FATAL ERROR: ' + err.message;
+      }
+    }
+
+    // Run automatically on load
+    document.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>

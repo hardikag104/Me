@@ -28,39 +28,39 @@
   // ==========================================
 
   const COURSES = {
-    machine_elements: {
-      id: 'machine_elements',
-      code: 'ME F312',
-      name: 'Machine Elements',
-      shortName: 'Mach Elements',
+    me_f314: {
+      id: 'me_f314',
+      code: 'ME F314',
+      name: 'Design of Machine Elements',
+      shortName: 'Machine Elements',
       color: '#6366f1', // Indigo
       badgeBg: '#e0e7ff',
       textColor: '#3730a3',
       icon: '⚙️'
     },
-    mfg_mgmt: {
-      id: 'mfg_mgmt',
-      code: 'MF F311',
-      name: 'Manufacturing Management',
-      shortName: 'Mfg Mgmt',
+    me_f316: {
+      id: 'me_f316',
+      code: 'ME F316',
+      name: 'Mechanics of Machinery',
+      shortName: 'Mechanics of Mach',
       color: '#ec4899', // Pink
       badgeBg: '#fce7f3',
       textColor: '#9d174d',
       icon: '🏭'
     },
-    engines_motors: {
-      id: 'engines_motors',
-      code: 'ME F313',
-      name: 'Engines & Motors',
-      shortName: 'Engines Motors',
+    me_f317: {
+      id: 'me_f317',
+      code: 'ME F317',
+      name: 'Engines and Motors',
+      shortName: 'Engines & Motors',
       color: '#f97316', // Orange
       badgeBg: '#ffedd5',
       textColor: '#9a3412',
       icon: '🚗'
     },
-    enzymology: {
-      id: 'enzymology',
-      code: 'BIO F215',
+    bio_f421: {
+      id: 'bio_f421',
+      code: 'BIO F421',
       name: 'Enzymology',
       shortName: 'Enzymology',
       color: '#10b981', // Emerald
@@ -68,9 +68,9 @@
       textColor: '#065f46',
       icon: '🧬'
     },
-    renewable_energy: {
-      id: 'renewable_energy',
-      code: 'ME F433',
+    bits_f462: {
+      id: 'bits_f462',
+      code: 'BITS F462',
       name: 'Renewable Energy',
       shortName: 'Renewable Energy',
       color: '#06b6d4', // Cyan
@@ -78,9 +78,9 @@
       textColor: '#155e75',
       icon: '🌱'
     },
-    sports_eng: {
-      id: 'sports_eng',
-      code: 'BITS F316',
+    me_f340: {
+      id: 'me_f340',
+      code: 'ME F340',
       name: 'Intro to Sport Engineering',
       shortName: 'Sport Eng',
       color: '#8b5cf6', // Purple
@@ -88,9 +88,9 @@
       textColor: '#5b21b6',
       icon: '⚽'
     },
-    adv_mfg: {
-      id: 'adv_mfg',
-      code: 'MF F312',
+    me_f315: {
+      id: 'me_f315',
+      code: 'ME F315',
       name: 'Advanced Manufacturing Processes',
       shortName: 'Adv Mfg',
       color: '#3b82f6', // Blue
@@ -98,9 +98,9 @@
       textColor: '#1e40af',
       icon: '🔬'
     },
-    new_venture: {
-      id: 'new_venture',
-      code: 'MGTS F211',
+    bits_f468: {
+      id: 'bits_f468',
+      code: 'BITS F468',
       name: 'New Venture Creation',
       shortName: 'New Venture',
       color: '#eab308', // Amber
@@ -109,6 +109,16 @@
       icon: '🚀'
     }
   };
+
+  // Backwards compatibility aliases
+  COURSES.machine_elements = COURSES.me_f314;
+  COURSES.mfg_mgmt = COURSES.me_f316;
+  COURSES.engines_motors = COURSES.me_f317;
+  COURSES.enzymology = COURSES.bio_f421;
+  COURSES.renewable_energy = COURSES.bits_f462;
+  COURSES.sports_eng = COURSES.me_f340;
+  COURSES.adv_mfg = COURSES.me_f315;
+  COURSES.new_venture = COURSES.bits_f468;
 
   // ==========================================
   // 2. DATA STRUCTURES: WEEKLY SCHEDULE

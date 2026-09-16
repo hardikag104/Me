@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food & Nutrition Module Unit & Integration Tests</title>
+  <style>
+    body { font-family: monospace; background: #09090d; color: #f3f4f8; padding: 20px; }
+    .pass { color: #10b981; }
+    .fail { color: #ef4444; font-weight: bold; }
+    .test-box { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Food & Nutrition Engine Test Runner</h1>
+  <div id="testResults"></div>
+  <div id="testContainer" style="margin-top: 30px; border: 1px dashed #333; padding: 10px;"></div>
+
+  <script src="ui-food.js"></script>
+  <script>
+    const resultsDiv = document.getElementById('testResults');
+    const container = document.getElementById('testContainer');
+    let total = 0;
+    let passed = 0;
+
+    function assert(desc, condition) {
+      total++;
+      const p = document.createElement('div');
+      if (condition) {
+        passed++;
+        p.className = 'pass';
+        p.textContent = `✓ [PASS] ${desc}`;
+      } else {
+        p.className = 'fail';
+        p.textContent = `✗ [FAIL] ${desc}`;
+      }
+      resultsDiv.appendChild(p);
+      console.log(p.textContent);
+    }
+
+    try {
+      // 1. API Availability
+      assert('window.renderFoodTab is a function', typeof window.renderFoodTab === 'function');
+      assert('window.FoodHealthUIComponent is defined', typeof window.FoodHealthUIComponent !== 'undefined');
+      assert('window.FoodHealthStorage is defined', typeof window.FoodHealthStorage !== 'undefined');
+      assert('window.DailyHealthScoreEngine is defined', typeof window.DailyHealthScoreEngine !== 'undefined');
+      assert('window.SmartFoodQualityAnalyzer is defined', typeof window.SmartFoodQualityAnalyzer !== 'undefined');
+
+      // 2. Storage Persistence Tests
+      localStorage.removeItem('me_food_logs');
+      localStorage.removeItem('me_hydration_logs');
+
+      const today = FoodHealthStorage.getTodayStr();
+      assert('Today date is valid format YYYY-MM-DD', /^\d{4}-\d{2}-\d{2}$/.test(today));
+
+      // Test Hydration Storage
+      FoodHealthStorage.saveHydration({ glasses: 4, ml: 1500, targetGlasses: 8, targetMl: 3000 }, today);
+      const loadedHydro = FoodHealthStorage.loadHydration(today);
+      assert('Hydration saved and loaded accurately (4 glasses, 1500ml)', loadedHydro.glasses === 4 && loadedHydro.ml === 1500);
+
+      const rawHydroKey = JSON.parse(localStorage.getItem('me_hydration_logs'));
+      assert('me_hydration_logs key in localStorage contains today data', rawHydroKey && rawHydroKey[today] && rawHydroKey[today].glasses === 4);
+
+      // Test Meals Storage
+      const sampleMeals = {
+        breakfast: [{ id: '1', text: 'Eggs & Toast', quality: 'clean', score: 90, tags: ['Protein'] }],
+        lunch: [{ id: '2', text: 'Burger / Pizza (Junk)', quality: 'junk', score: 25, tags: ['Ultra-Processed'] }],
+        snacks: [{ id: '3', text: 'Cold Drink / Soda', quality: 'junk', score: 10, tags: ['High Sugar'] }],
+        dinner: [{ id: '4', text: 'Dal Roti & Sabzi', quality: 'clean', score: 92, tags: ['Clean Fuel'] }]
+      };
+      FoodHealthStorage.saveMeals(sampleMeals, today);
+      const loadedMeals = FoodHealthStorage.loadMeals(today);
+      assert('Meals saved and loaded with all 4 slots', loadedMeals.breakfast.length === 1 && loadedMeals.dinner.length === 1);
+
+      const rawMealKey = JSON.parse(localStorage.getItem('me_food_logs'));
+      assert('me_food_logs key in localStorage contains today data', rawMealKey && rawMealKey[today] && rawMealKey[today].breakfast[0].text === 'Eggs & Toast');
+
+      // 3. Smart Food Quality Analyzer Tests
+      const eggAnalysis = SmartFoodQualityAnalyzer.analyzeItem('Eggs & Toast');
+      assert('Eggs & Toast analyzed as clean fuel', eggAnalysis.quality === 'clean' && eggAnalysis.score >= 80);
+
+      const junkAnalysis = SmartFoodQualityAnalyzer.analyzeItem('Burger / Pizza (Junk)');
+      assert('Burger / Pizza analyzed as junk food', junkAnalysis.quality === 'junk' && junkAnalysis.score <= 40);
+
+      const samosaAnalysis = SmartFoodQualityAnalyzer.analyzeItem('Samosa / Fried');
+      assert('Samosa / Fried detected as junk with Heavy Oil tag', samosaAnalysis.quality === 'junk' && samosaAnalysis.tags.includes('Heavy Oil'));
+
+      const sodaAnalysis = SmartFoodQualityAnalyzer.analyzeItem('Cold Drink / Soda');
+      assert('Cold Drink / Soda detected as junk with High Sugar tag', sodaAnalysis.quality === 'junk' && sodaAnalysis.tags.includes('High Sugar'));
+
+      const fruitAnalysis = SmartFoodQualityAnalyzer.analyzeItem('Fresh Fruits');
+      assert('Fresh Fruits detected as clean with Micronutrients tag', fruitAnalysis.quality === 'clean' && fruitAnalysis.tags.includes('Micronutrients'));
+
+      // 4. Daily Health Score Engine & Biohacking Feedback
+      // Clean only test
+      const cleanResult = DailyHealthScoreEngine.calculate({
+        meals: {
+          breakfast: [{ quality: 'clean' }],
+          lunch: [{ quality: 'clean' }],
+          snacks: [{ quality: 'clean' }],
+          dinner: [{ quality: 'clean' }]
+        },
+        hydrationGlasses: 8
+      });
+      assert('Clean meals + 8 glasses yields high health score (>= 80%)', cleanResult.score >= 80);
+      assert('Clean fuel biohacking advice generated', cleanResult.feedback.headline.includes('Clean fuel'));
+
+      // Junk food test
+      const junkResult = DailyHealthScoreEngine.calculate({
+        meals: {
+          breakfast: [{ quality: 'junk' }],
+          lunch: [{ quality: 'junk' }]
+        },
+        hydrationGlasses: 2
+      });
+      assert('Junk food triggers honest biohacking warning', junkResult.feedback.headline.includes('High oil & sugar detected'));
+
+      // 5. Standalone UI Rendering & DOM Handlers
+      const controller = renderFoodTab('testContainer');
+      assert('renderFoodTab returned controller instance', controller !== null);
+
+      // Verify DOM elements exist
+      const glasses = container.querySelectorAll('.glass-btn');
+      assert('Rendered exactly 8 interactive water glasses', glasses.length === 8);
+
+      const progressBar = container.querySelector('.hydro-bar-fill');
+      assert('Rendered fluid progress bar', progressBar !== null);
+
+      const slots = container.querySelectorAll('.meal-slot-card');
+      assert('Rendered 4 meal slots (Breakfast, Lunch, Evening Snacks, Dinner)', slots.length === 4);
+
+      const chips = container.querySelectorAll('.quick-chip');
+      assert('Rendered quick-add student meal chips', chips.length >= 10);
+
+      // Interactive test: toggle glass 5
+      controller.setGlasses(5);
+      assert('Setting glasses to 5 updates hydration.glasses to 5', controller.hydration.glasses === 5);
+      assert('Setting glasses to 5 calculates 1875ml', controller.hydration.ml === 1875);
+
+      // Test +500ml bottle
+      controller.addBottle500ml();
+      assert('Adding 500ml bottle increases ml to 2375ml', controller.hydration.ml === 2375);
+
+      // Test adding meal item
+      const initialCount = (controller.meals.breakfast || []).length;
+      controller.addMealItem('breakfast', 'Oatmeal & Milk');
+      assert('Adding Oatmeal & Milk increments breakfast count', controller.meals.breakfast.length === initialCount + 1);
+
+      // Test removing meal item
+      controller.removeMealItem('breakfast', controller.meals.breakfast.length - 1);
+      assert('Removing meal item returns count to initial', controller.meals.breakfast.length === initialCount);
+
+      // Summary
+      const summaryP = document.createElement('h2');
+      summaryP.textContent = `All Tests Complete: ${passed} / ${total} Passed (${passed === total ? '100% SUCCESS' : 'FAILURES DETECTED'})`;
+      summaryP.style.color = passed === total ? '#10b981' : '#ef4444';
+      document.body.insertBefore(summaryP, resultsDiv);
+      window.__TEST_REPORT__ = { passed, total, success: passed === total };
+
+    } catch (e) {
+      assert(`Unhandled test exception: ${e.message}`, false);
+      console.error(e);
+    }
+  </script>
+</body>
+</html>

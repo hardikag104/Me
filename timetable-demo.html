@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#09090d">
+  <title>BITS Pilani Timetable & Attendance — Me Life OS</title>
+  <style>
+    :root {
+      --bg-primary: #09090d;
+      --bg-surface: #12121a;
+      --bg-surface-elevated: #181824;
+      --text-primary: #f3f4f8;
+      --text-secondary: #9494a8;
+      --border-subtle: #1f1f2e;
+      --border-focus: #2f2f48;
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124, 92, 252, 0.35);
+      --accent-dim: rgba(124, 92, 252, 0.12);
+      --accent-hover: #8e71ff;
+      --mint: #10b981;
+      --mint-glow: rgba(16, 185, 129, 0.35);
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --cyan: #06b6d4;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .demo-wrapper {
+      width: 100%;
+      max-width: 620px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .demo-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .demo-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .demo-live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--mint);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--mint);
+    }
+
+    .demo-actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .demo-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .demo-btn:hover {
+      border-color: var(--accent);
+      color: #c4b5fd;
+    }
+    .demo-btn.danger {
+      color: var(--rose);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-wrapper">
+  <!-- Top Demo Bar -->
+  <header class="demo-top-bar">
+    <div class="demo-brand">
+      <span class="demo-live-dot"></span>
+      <span>ME — BITS Pilani OS</span>
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;" id="clockTicker">
+      --:--
+    </div>
+  </header>
+
+  <!-- Quick Demo Controls -->
+  <div class="demo-actions-row">
+    <button class="demo-btn" id="btnDemoFillHealthy">⚡ Simulate Healthy Attendance (88%)</button>
+    <button class="demo-btn" id="btnDemoFillWarning">⚠️ Simulate Low Attendance (&lt;75% Warning)</button>
+    <button class="demo-btn danger" id="btnDemoReset">↺ Reset Attendance</button>
+  </div>
+
+  <!-- Timetable Container Mount -->
+  <div id="timetableAppContainer"></div>
+</div>
+
+<script src="ui-timetable.js"></script>
+<script>
+  const { TimetableUIComponent, TimetableEngine } = window;
+
+  // Live clock
+  const clockEl = document.getElementById('clockTicker');
+  setInterval(() => {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }, 1000);
+  clockEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  // Mount UI Component
+  const container = document.getElementById('timetableAppContainer');
+  const component = new TimetableUIComponent(container);
+  component.init();
+
+  // Demo buttons
+  document.getElementById('btnDemoFillHealthy').onclick = () => {
+    TimetableEngine.resetAllAttendance();
+    const dates = ['2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04', '2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11'];
+    // Fill present on most classes
+    dates.forEach(d => {
+      TimetableEngine.markAttendance(d, 'mon_0800_me314_tut', 'present');
+      TimetableEngine.markAttendance(d, 'mon_0900_me316_lec', 'present');
+      TimetableEngine.markAttendance(d, 'mon_1000_me317_lec', 'present');
+      TimetableEngine.markAttendance(d, 'tue_1100_me315_lec', 'present');
+      TimetableEngine.markAttendance(d, 'tue_1400_me315_lab', 'present');
+      TimetableEngine.markAttendance(d, 'thu_1800_bits468_lec', 'present');
+    });
+    // 1 absent
+    TimetableEngine.markAttendance('2026-09-08', 'mon_0800_me314_tut', 'absent');
+    component.render();
+  };
+
+  document.getElementById('btnDemoFillWarning').onclick = () => {
+    TimetableEngine.resetAllAttendance();
+    // Simulate ME F317 and BIO F421 in danger zone (<75%)
+    TimetableEngine.markAttendance('2026-09-01', 'mon_1000_me317_lec', 'present');
+    TimetableEngine.markAttendance('2026-09-02', 'tue_1600_me317_tut', 'absent');
+    TimetableEngine.markAttendance('2026-09-03', 'wed_1000_me317_lec', 'absent');
+
+    TimetableEngine.markAttendance('2026-09-01', 'mon_1400_bio421_lec', 'present');
+    TimetableEngine.markAttendance('2026-09-02', 'wed_1400_bio421_lec', 'absent');
+    TimetableEngine.markAttendance('2026-09-03', 'fri_1400_bio421_lec', 'absent');
+
+    component.render();
+  };
+
+  document.getElementById('btnDemoReset').onclick = () => {
+    TimetableEngine.resetAllAttendance();
+    component.render();
+  };
+</script>
+
+</body>
+</html>

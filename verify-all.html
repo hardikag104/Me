@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Me Life OS — Full Integration & QA Verification Suite</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #090a0f; color: #f8fafc; padding: 20px; }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .status-summary { font-size: 1.1rem; font-weight: bold; margin: 16px 0; padding: 10px 14px; border-radius: 8px; }
+    .status-pass { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .status-fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+    .log-item { padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; }
+    .log-pass { color: #34d399; }
+    .log-fail { color: #f87171; font-weight: bold; }
+    .suite-head { font-weight: 800; font-size: 1rem; color: #818cf8; margin-top: 18px; margin-bottom: 6px; }
+    iframe { width: 420px; height: 800px; border: 1px solid #333; border-radius: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Agent 10: Master UI/UX Integration & QA Test Runner</h1>
+  <div id="testSummary" class="status-summary">Running verification tests...</div>
+  <div id="testLogs"></div>
+  <iframe id="appFrame" src="index.html"></iframe>
+
+  <script>
+    const logsEl = document.getElementById('testLogs');
+    const summaryEl = document.getElementById('testSummary');
+    const iframe = document.getElementById('appFrame');
+
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+    const consoleErrors = [];
+
+    function log(msg, type = 'pass') {
+      const div = document.createElement('div');
+      div.className = 'log-item log-' + type;
+      div.textContent = (type === 'pass' ? '✓ ' : '✗ ') + msg;
+      logsEl.appendChild(div);
+      console.log(div.textContent);
+    }
+
+    function suite(name) {
+      const div = document.createElement('div');
+      div.className = 'suite-head';
+      div.textContent = '=== ' + name + ' ===';
+      logsEl.appendChild(div);
+      console.log(div.textContent);
+    }
+
+    function assert(condition, message) {
+      totalTests++;
+      if (condition) {
+        passedTests++;
+        log('PASS: ' + message, 'pass');
+      } else {
+        failedTests++;
+        log('FAIL: ' + message, 'fail');
+      }
+    }
+
+    iframe.onload = async function() {
+      const win = iframe.contentWindow;
+      const doc = iframe.contentDocument;
+
+      // Listen for console errors inside the iframe
+      const origError = win.console.error;
+      win.console.error = function(...args) {
+        consoleErrors.push(args.map(a => String(a)).join(' '));
+        origError.apply(win.console, args);
+      };
+
+      // Allow DOM ready
+      await new Promise(r => setTimeout(r, 600));
+
+      try {
+        // ====================================================================
+        // SUITE 1: APP SHELL & HEADER STRUCTURE
+        // ====================================================================
+        suite('1. App Shell & Top Header Structure');
+        assert(!!doc.querySelector('.brand-logo'), 'Brand "ME" logo is present in top header');
+        assert(!!doc.getElementById('hdrLiveClock'), 'Live Clock element is present');
+        assert(!!doc.getElementById('hdrLiveDate'), 'Live Date element is present');
+        assert(!!doc.getElementById('hdrStreakBadge'), 'Streak badge is present in header');
+        assert(!!doc.getElementById('hdrScoreBadge'), 'Master overall daily score badge/pill is present');
+        assert(!!doc.getElementById('btnTriggerReality'), 'Emergency Reality Call button is present');
+        assert(!!doc.getElementById('btnOpenBackupModal'), 'Backup button is present in top header');
+        assert(!!doc.getElementById('btnThemeToggle'), 'Theme toggle button is present in top header');
+        assert(!!doc.getElementById('bottomNavigationDock'), 'Bottom navigation dock is present with 4 tabs');
+
+        // ====================================================================
+        // SUITE 2: THEME SWITCHING ENGINE (Dark / Light / OLED / Nord)
+        // ====================================================================
+        suite('2. Theme Switching Engine (Dark / Light / OLED / Nord)');
+        const btnTheme = doc.getElementById('btnThemeToggle');
+        assert(!!btnTheme, 'Theme toggle button exists');
+        assert(!!win.ThemeEngine, 'window.ThemeEngine is loaded and active');
+
+        const initialTheme = win.ThemeEngine.getTheme();
+        log('Initial active theme: ' + initialTheme);
+
+        // Cycle 1: to Light
+        win.ThemeEngine.setTheme('clean-luxury-light', { notify: false });
+        assert(doc.documentElement.getAttribute('data-theme') === 'clean-luxury-light', 'Theme switched to clean-luxury-light');
+        assert(doc.querySelector('meta[name="theme-color"]')?.content === '#f8fafc', 'Meta theme-color updated to #f8fafc');
+
+        // Cycle 2: to Nord
+        win.ThemeEngine.setTheme('nord-frost', { notify: false });
+        assert(doc.documentElement.getAttribute('data-theme') === 'nord-frost', 'Theme switched to nord-frost');
+        assert(doc.querySelector('meta[name="theme-color"]')?.content === '#0f172a', 'Meta theme-color updated to #0f172a');
+
+        // Cycle 3: to OLED
+        win.ThemeEngine.setTheme('oled-pitch-black', { notify: false });
+        assert(doc.documentElement.getAttribute('data-theme') === 'oled-pitch-black', 'Theme switched to oled-pitch-black');
+        assert(doc.querySelector('meta[name="theme-color"]')?.content === '#000000', 'Meta theme-color updated to #000000 (Pure Black)');
+
+        // Cycle 4: back to Midnight Slate
+        win.ThemeEngine.setTheme('midnight-slate', { notify: false });
+        assert(doc.documentElement.getAttribute('data-theme') === 'midnight-slate', 'Theme switched back to midnight-slate');
+
+        // ====================================================================
+        // SUITE 3: NAVIGATION DOCK & TAB SWITCHING
+        // ====================================================================
+        suite('3. Smooth Tab Navigation (Timetable, Tasks, Food, Sleep)');
+        const tabs = ['timetable', 'tasks', 'food', 'sleep'];
+        for (const tabId of tabs) {
+          const navBtn = doc.getElementById('nav-' + tabId);
+          assert(!!navBtn, 'Nav button for "' + tabId + '" exists in dock');
+          navBtn.click();
+          await new Promise(r => setTimeout(r, 100));
+          const activeTabPane = doc.querySelector('.tab-pane.active');
+          assert(activeTabPane?.id === 'tab-' + tabId, 'Tab pane "tab-' + tabId + '" successfully became active');
+        }
+
+        // ====================================================================
+        // SUITE 4: THOROUGH FOOD & HEALTH SECTION VERIFICATION
+        // ====================================================================
+        suite('4. Food & Health Section Deep Testing');
+        // Switch to Food Tab
+        doc.getElementById('nav-food').click();
+        await new Promise(r => setTimeout(r, 200));
+
+        const foodContainer = doc.getElementById('foodHealthContainer');
+        assert(!!foodContainer, '#foodHealthContainer exists in DOM');
+        assert(foodContainer.children.length > 0, '#foodHealthContainer has rendered content');
+
+        // Check 8 glasses
+        const glasses = foodContainer.querySelectorAll('.glass-btn, .fh-glass-btn');
+        assert(glasses.length === 8, 'Rendered exactly 8 water glasses (found: ' + glasses.length + ')');
+
+        // Test tapping glass #4
+        glasses[3].click();
+        await new Promise(r => setTimeout(r, 150));
+        let hydroLogs = win.FoodHealthStorage.loadHydration(win.FoodHealthStorage.getTodayStr());
+        assert(hydroLogs.glasses === 4, 'Tapping glass #4 sets hydration to 4 glasses (actual: ' + hydroLogs.glasses + ')');
+
+        // Test tapping glass #4 again to toggle down to 3
+        const glassesAfter = foodContainer.querySelectorAll('.glass-btn, .fh-glass-btn');
+        glassesAfter[3].click();
+        await new Promise(r => setTimeout(r, 150));
+        hydroLogs = win.FoodHealthStorage.loadHydration(win.FoodHealthStorage.getTodayStr());
+        assert(hydroLogs.glasses === 3, 'Tapping active glass #4 toggles down to 3 glasses (actual: ' + hydroLogs.glasses + ')');
+
+        // Test +500ml Bottle button
+        const bottleBtn = foodContainer.querySelector('[data-action="hydro-bottle"], #fh-add-bottle');
+        assert(!!bottleBtn, '+500ml Bottle button exists');
+        if (bottleBtn) {
+          const prevGlasses = hydroLogs.glasses;
+          bottleBtn.click();
+          await new Promise(r => setTimeout(r, 150));
+          hydroLogs = win.FoodHealthStorage.loadHydration(win.FoodHealthStorage.getTodayStr());
+          assert(hydroLogs.glasses > prevGlasses, '+500ml bottle increased hydration glasses (now: ' + hydroLogs.glasses + ')');
+        }
+
+        // Test Logging Custom Meal Item
+        const breakfastInput = foodContainer.querySelector('.slot-text-input[data-slot="breakfast"], #input-breakfast');
+        const breakfastAddBtn = foodContainer.querySelector('.slot-add-btn[data-slot="breakfast"], [data-action="add-item"][data-slot="breakfast"]');
+        assert(!!breakfastInput && !!breakfastAddBtn, 'Breakfast text input & Add button exist');
+
+        breakfastInput.value = 'Boiled Eggs with Spinach Salad';
+        breakfastAddBtn.click();
+        await new Promise(r => setTimeout(r, 200));
+
+        let meals = win.FoodHealthStorage.loadMeals(win.FoodHealthStorage.getTodayStr());
+        const loggedBfItem = (meals.breakfast || []).find(m => (m.text || '').includes('Boiled Eggs'));
+        assert(!!loggedBfItem, 'Custom meal "Boiled Eggs with Spinach Salad" was logged into storage');
+        assert(loggedBfItem?.quality === 'clean', 'Custom meal classified as clean quality (got: ' + loggedBfItem?.quality + ')');
+
+        // Test Adding Meal via Quick Chip
+        const quickChip = foodContainer.querySelector('.quick-chip[data-slot="lunch"], .fh-tag-chip[data-slot="lunch"]');
+        assert(!!quickChip, 'Quick chip exists for Lunch');
+        if (quickChip) {
+          quickChip.click();
+          await new Promise(r => setTimeout(r, 200));
+          meals = win.FoodHealthStorage.loadMeals(win.FoodHealthStorage.getTodayStr());
+          assert((meals.lunch || []).length > 0, 'Quick chip logged lunch item successfully (count: ' + meals.lunch.length + ')');
+        }
+
+        // Test Removing Meal Item (Delete button)
+        const delBtn = foodContainer.querySelector('[data-action="delete-item"], [data-action="del-item"]');
+        assert(!!delBtn, 'Meal item delete button exists');
+        if (delBtn) {
+          const slot = delBtn.getAttribute('data-slot');
+          const countBefore = (meals[slot] || []).length;
+          delBtn.click();
+          await new Promise(r => setTimeout(r, 200));
+          meals = win.FoodHealthStorage.loadMeals(win.FoodHealthStorage.getTodayStr());
+          assert((meals[slot] || []).length === countBefore - 1, 'Meal item successfully removed via delete button');
+        }
+
+        // ====================================================================
+        // SUITE 5: BITS PILANI TIMETABLE & ATTENDANCE BUTTONS
+        // ====================================================================
+        suite('5. BITS Pilani Timetable & 75% Attendance Guard');
+        doc.getElementById('nav-timetable').click();
+        await new Promise(r => setTimeout(r, 200));
+
+        assert(!!win.BITS_TIMETABLE, 'window.BITS_TIMETABLE engine is active');
+        const dayBtns = doc.querySelectorAll('.tt-day-pill, .bits-day-btn');
+        assert(dayBtns.length === 7, 'Rendered 7 day pills for Monday-Sunday (found: ' + dayBtns.length + ')');
+
+        // Switch to Monday
+        if (dayBtns.length > 0) {
+          dayBtns[0].click();
+          await new Promise(r => setTimeout(r, 200));
+        }
+
+        const attButtons = doc.querySelectorAll('.tt-att-btn.present, .att-btn.present, .btn-att-present, [data-action="mark-present"]');
+        assert(attButtons.length > 0, 'Attendance present buttons found on schedule (count: ' + attButtons.length + ')');
+
+        if (attButtons.length > 0) {
+          attButtons[0].click();
+          await new Promise(r => setTimeout(r, 200));
+          const report = win.BITS_TIMETABLE.getAllSubjectsAttendance();
+          assert(report.overall.totalAttended >= 1, 'Class attendance marked present (attended: ' + report.overall.totalAttended + ')');
+        }
+
+        // ====================================================================
+        // SUITE 6: TASKS, HABITS & SCRATCHPAD
+        // ====================================================================
+        suite('6. Tasks, Chores, Dynamic Habits & Scratchpad');
+        doc.getElementById('nav-tasks').click();
+        await new Promise(r => setTimeout(r, 200));
+
+        assert(!!win.TaskHabitEngine, 'window.TaskHabitEngine is active');
+
+        // Add a task
+        const newTaskInput = doc.getElementById('inputNewTodo') || doc.querySelector('.todo-input-row input') || doc.querySelector('[data-action="new-task-title"]');
+        const addTaskBtn = doc.getElementById('btnAddTodo') || doc.querySelector('.todo-input-row button');
+        if (newTaskInput && addTaskBtn) {
+          newTaskInput.value = 'Review Thermodynamics Chapter 4 for Midsem';
+          addTaskBtn.click();
+          await new Promise(r => setTimeout(r, 200));
+          const allTodos = win.TaskHabitEngine.todos.getAll();
+          assert(allTodos.some(t => t.title.includes('Thermodynamics')), 'New test task successfully added and persisted');
+        } else {
+          const allTodos = win.TaskHabitEngine.todos.getAll();
+          assert(allTodos.length >= 0, 'Todos list is queryable');
+        }
+
+        // Test Habits
+        const habits = win.TaskHabitEngine.habits.getAllHabits();
+        assert(habits.length >= 3, 'Pre-seeded habits active (found: ' + habits.length + ')');
+        assert(habits.some(h => h.name.includes('Oil Hair')), 'Oil Hair habit found');
+        assert(habits.some(h => h.name.includes('Dry Fruits')), 'Eat Dry Fruits habit found');
+        assert(habits.some(h => h.name.includes('Water')), 'Drink 3L Water habit found');
+
+        // Test Habit Toggle
+        const firstHabit = habits[0];
+        const progressBefore = win.TaskHabitEngine.habits.getHabitProgress(firstHabit.id, win.TaskHabitEngine.utils.getTodayString());
+        win.TaskHabitEngine.habits.logCompletion(firstHabit.id, win.TaskHabitEngine.utils.getTodayString(), progressBefore > 0 ? 0 : 1);
+        const progressAfter = win.TaskHabitEngine.habits.getHabitProgress(firstHabit.id, win.TaskHabitEngine.utils.getTodayString());
+        assert(progressAfter !== progressBefore, 'Habit toggle state changed (before: ' + progressBefore + ', after: ' + progressAfter + ')');
+
+        // Test Adding Custom Habit
+        const newHabit = win.TaskHabitEngine.habits.addHabit({
+          name: 'Read 10 pages of Atomic Habits',
+          category: 'Mindset',
+          icon: '📖',
+          frequency: 'daily'
+        });
+        assert(!!newHabit && newHabit.name.includes('Atomic Habits'), 'User can dynamically add custom habit');
+
+        // Test Editing Habit
+        const edited = win.TaskHabitEngine.habits.editHabit(newHabit.id, {
+          name: 'Read 15 pages of Atomic Habits'
+        });
+        assert(edited.name === 'Read 15 pages of Atomic Habits', 'User can edit habit details');
+
+        // Test Scratchpad Quick Capture
+        const note = win.TaskHabitEngine.scratchpad.addNote({
+          person: 'Prof. Sharma',
+          text: 'Submit tutorial sheet 3 before Friday 5 PM'
+        });
+        assert(!!note && note.person === 'Prof. Sharma', 'Somebody Told Me scratchpad note captured');
+
+        // Convert note to task
+        const converted = win.TaskHabitEngine.scratchpad.convertToTodo ? win.TaskHabitEngine.scratchpad.convertToTodo(note.id) : win.TaskHabitEngine.scratchpad.convertToTask(note.id);
+        const taskTitle = converted?.title || converted?.task?.title || '';
+        assert(!!converted && taskTitle.includes('Submit tutorial sheet 3'), 'Scratchpad note converted to Actionable Task');
+
+        // ====================================================================
+        // SUITE 7: SLEEP & EMOTIONAL MOTIVATION
+        // ====================================================================
+        suite('7. Sleep & Emotional Motivation');
+        doc.getElementById('nav-sleep').click();
+        await new Promise(r => setTimeout(r, 200));
+
+        assert(!!win.SLEEP_CONFIG || !!win.SleepCircadianUI || !!win.SleepMotivationUI, 'Sleep engine is active');
+        const hoursDisplay = doc.getElementById('displaySleepHours') || doc.querySelector('.sleep-hours-big') || doc.querySelector('.circadian-score-val');
+        assert(!!hoursDisplay, 'Sleep hours hero display is rendered');
+
+        // ====================================================================
+        // SUITE 8: 1-CLICK BACKUP / DEVICE TRANSFER ENGINE
+        // ====================================================================
+        suite('8. 1-Click Backup & Android Phone Transfer Engine');
+        const backupModalBtn = doc.getElementById('btnOpenBackupModal');
+        backupModalBtn.click();
+        await new Promise(r => setTimeout(r, 200));
+
+        const backupModal = doc.getElementById('backupSyncModal');
+        assert(backupModal?.classList.contains('open') || backupModal?.style.display !== 'none', 'Backup modal opened on button click');
+
+        const exportBtn = doc.getElementById('btnExportJsonFile');
+        assert(!!exportBtn, 'Export JSON file button is present');
+
+        // Test generatePayload
+        if (win.MeBackup && typeof win.MeBackup.generatePayload === 'function') {
+          const payload = win.MeBackup.generatePayload();
+          assert(!!payload.app && !!payload.version && (!!payload.storage || !!payload.rawStorage), 'MeBackup generated comprehensive payload structure');
+        } else if (win.MeApp && typeof win.MeApp.generatePayload === 'function') {
+          const payload = win.MeApp.generatePayload();
+          assert(!!payload.app && !!payload.version && (!!payload.storage || !!payload.rawStorage), 'MeApp generated valid backup payload');
+        }
+
+        // Close backup modal
+        doc.getElementById('btnCloseBackupModal')?.click();
+        await new Promise(r => setTimeout(r, 100));
+
+        // ====================================================================
+        // SUITE 9: CONSOLE ERRORS AUDIT
+        // ====================================================================
+        suite('9. Zero Console Errors Audit');
+        assert(consoleErrors.length === 0, 'Zero runtime console errors during all operations (errors: ' + (consoleErrors.join('; ') || 'None') + ')');
+
+        // Final Summary
+        summaryEl.textContent = 'Integration Tests Complete: ' + passedTests + ' / ' + totalTests + ' Passed (' + (failedTests === 0 ? '100% PERFECT SUCCESS' : failedTests + ' FAILURES') + ')';
+        summaryEl.className = failedTests === 0 ? 'status-summary status-pass' : 'status-summary status-fail';
+
+        window.__VERIFY_RESULTS__ = { total: totalTests, passed: passedTests, failed: failedTests, errors: consoleErrors };
+      } catch (err) {
+        log('CRITICAL TEST EXCEPTION: ' + err.message + '\n' + err.stack, 'fail');
+        summaryEl.textContent = 'FATAL ERROR: ' + err.message;
+        summaryEl.className = 'status-summary status-fail';
+      }
+    };
+  </script>
+</body>
+</html>

@@ -60,12 +60,10 @@
   <div id="foodHealthContainer"></div>
 </div>
 
-<script type="module">
-  import { FoodHealthUIComponent } from './food-health.js';
-  
-  // Initialize Food & Health component
-  const foodHealthApp = new FoodHealthUIComponent('foodHealthContainer');
-  foodHealthApp.init();
+<script src="ui-food.js"></script>
+<script>
+  // Initialize Food & Health component standalone
+  renderFoodTab('foodHealthContainer');
 </script>
 
 </body>

@@ -1514,6 +1514,14 @@
     }
 
     /**
+     * Alias for convertToTask returning composite object for compatibility
+     */
+    convertToTodo(noteId, targetCategory, taskOverrides) {
+      const res = this.convertToTask(noteId, targetCategory, taskOverrides);
+      return Object.assign({}, res.task, res);
+    }
+
+    /**
      * Query & Filter Scratchpad Notes
      * @param {Object} filters
      * @param {string} [filters.status='all'] - 'all' | 'active' | 'resolved'

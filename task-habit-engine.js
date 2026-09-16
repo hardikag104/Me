@@ -1474,6 +1474,10 @@
      * @param {string} [targetCategory='Daily chore'] - 'Daily chore' | 'Test/Exam' | 'Meeting' | 'Urgent'
      * @param {Object} [taskOverrides] - Optional custom title, date, etc.
      */
+    convertToTodo(noteId, targetCategory = TASK_CATEGORIES.DAILY_CHORE, taskOverrides = {}) {
+      return this.convertToTask(noteId, targetCategory, taskOverrides);
+    }
+
     convertToTask(noteId, targetCategory = TASK_CATEGORIES.DAILY_CHORE, taskOverrides = {}) {
       const note = this.getById(noteId);
       if (!note) throw new Error(`Note "${noteId}" not found`);
@@ -1511,6 +1515,14 @@
         note: this.getById(note.id),
         task: createdTask
       };
+    }
+
+    /**
+     * Alias for convertToTask returning composite object for compatibility
+     */
+    convertToTodo(noteId, targetCategory, taskOverrides) {
+      const res = this.convertToTask(noteId, targetCategory, taskOverrides);
+      return Object.assign({}, res.task, res);
     }
 
     /**

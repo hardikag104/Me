@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BITS Pilani Timetable & Attendance UI Test Suite</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #09090d;
+      color: #f3f4f8;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    h1 { color: #c4b5fd; margin-bottom: 8px; }
+    .status-box {
+      background: #12121a;
+      border: 1px solid #1f1f2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .test-pass { color: #10b981; font-weight: 700; }
+    .test-fail { color: #ef4444; font-weight: 700; }
+    .log-line { font-family: monospace; font-size: 0.85rem; margin: 4px 0; }
+    #mountTestContainer {
+      background: #12121a;
+      border: 1px solid #1f1f2e;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      max-width: 650px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>BITS Timetable & Attendance UI Test Suite</h1>
+  <p style="color: #9494a8;">Automated verification of courses, weekly schedule, 75% attendance logic, and UI component.</p>
+
+  <div class="status-box">
+    <div id="testSummary" style="font-size: 1.1rem; font-weight: bold;">Running tests...</div>
+    <div id="testLogs" style="margin-top: 10px;"></div>
+  </div>
+
+  <h2>Mount Test Container (Visual Verification)</h2>
+  <div id="mountTestContainer"></div>
+
+  <script src="ui-timetable.js"></script>
+  <script>
+    const { COURSES, WEEKLY_SCHEDULE, TimetableEngine, TimetableUIComponent } = window;
+
+    const logsContainer = document.getElementById('testLogs');
+    const summaryContainer = document.getElementById('testSummary');
+    let passCount = 0;
+    let failCount = 0;
+
+    function assert(cond, msg) {
+      const line = document.createElement('div');
+      line.className = 'log-line';
+      if (cond) {
+        passCount++;
+        line.innerHTML = `<span class="test-pass">✓ PASS:</span> ${msg}`;
+      } else {
+        failCount++;
+        line.innerHTML = `<span class="test-fail">✗ FAIL:</span> ${msg}`;
+        console.error('Assertion failed:', msg);
+      }
+      logsContainer.appendChild(line);
+    }
+
+    async function runTests() {
+      try {
+        // -------------------------------------------------------------
+        // TEST SUITE 1: COURSES INTEGRITY
+        // -------------------------------------------------------------
+        assert(!!COURSES.me_f314, 'ME F314 exists in COURSES');
+        assert(COURSES.me_f314.code === 'ME F314', 'ME F314 has correct code');
+        assert(COURSES.me_f314.name === 'Design of Machine Elements', 'ME F314 has correct full name');
+
+        assert(!!COURSES.me_f315, 'ME F315 exists in COURSES');
+        assert(COURSES.me_f315.code === 'ME F315', 'ME F315 has correct code');
+        assert(COURSES.me_f315.name === 'Advanced Manufacturing Processes', 'ME F315 has correct full name');
+
+        assert(!!COURSES.me_f316, 'ME F316 exists in COURSES');
+        assert(COURSES.me_f316.code === 'ME F316', 'ME F316 has correct code');
+        assert(COURSES.me_f316.name === 'Mechanics of Machinery', 'ME F316 has correct full name');
+
+        assert(!!COURSES.me_f317, 'ME F317 exists in COURSES');
+        assert(COURSES.me_f317.code === 'ME F317', 'ME F317 has correct code');
+        assert(COURSES.me_f317.name === 'Engines and Motors', 'ME F317 has correct full name');
+
+        assert(!!COURSES.bio_f421, 'BIO F421 exists in COURSES');
+        assert(COURSES.bio_f421.code === 'BIO F421', 'BIO F421 has correct code');
+        assert(COURSES.bio_f421.name === 'Enzymology', 'BIO F421 has correct full name');
+
+        assert(!!COURSES.bits_f462, 'BITS F462 exists in COURSES');
+        assert(COURSES.bits_f462.code === 'BITS F462', 'BITS F462 has correct code');
+        assert(COURSES.bits_f462.name === 'Renewable Energy', 'BITS F462 has correct full name');
+
+        assert(!!COURSES.me_f340, 'ME F340 exists in COURSES');
+        assert(COURSES.me_f340.code === 'ME F340', 'ME F340 has correct code');
+        assert(COURSES.me_f340.name === 'Intro to Sport Engineering', 'ME F340 has correct full name');
+
+        assert(!!COURSES.bits_f468, 'BITS F468 exists in COURSES');
+        assert(COURSES.bits_f468.code === 'BITS F468', 'BITS F468 has correct code');
+        assert(COURSES.bits_f468.name === 'New Venture Creation', 'BITS F468 has correct full name');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 2: WEEKLY SCHEDULE ACCURACY
+        // -------------------------------------------------------------
+        // Monday: 6 classes
+        const mon = WEEKLY_SCHEDULE[1];
+        assert(mon.length === 6, 'Monday has 6 scheduled classes');
+        assert(mon[0].courseId === 'me_f314' && mon[0].type === 'Tutorial' && mon[0].startTime === '08:00' && mon[0].room === 'FD I 1227', 'Mon 8am: ME F314 Tut in FD I 1227');
+        assert(mon[1].courseId === 'me_f316' && mon[1].type === 'Lecture' && mon[1].startTime === '09:00' && mon[1].room === 'LTC 5106', 'Mon 9am: ME F316 Lec in LTC 5106');
+        assert(mon[2].courseId === 'me_f317' && mon[2].type === 'Lecture' && mon[2].startTime === '10:00' && mon[2].room === 'FD I 1201', 'Mon 10am: ME F317 Lec in FD I 1201');
+        assert(mon[3].courseId === 'bio_f421' && mon[3].type === 'Lecture' && mon[3].startTime === '14:00' && mon[3].room === 'NAB 6158', 'Mon 2pm: BIO F421 Lec in NAB 6158');
+        assert(mon[4].courseId === 'bits_f462' && mon[4].type === 'Lecture' && mon[4].startTime === '15:00' && mon[4].room === 'FD I 1231', 'Mon 3pm: BITS F462 Lec in FD I 1231');
+        assert(mon[5].courseId === 'me_f340' && mon[5].type === 'Lecture' && mon[5].startTime === '16:00' && mon[5].room === 'FD I 1202', 'Mon 4pm: ME F340 Lec in FD I 1202');
+
+        // Tuesday: 5 classes
+        const tue = WEEKLY_SCHEDULE[2];
+        assert(tue.length === 5, 'Tuesday has 5 scheduled classes');
+        assert(tue[0].courseId === 'me_f316' && tue[0].type === 'Tutorial' && tue[0].startTime === '08:00' && tue[0].room === 'FD I 1223', 'Tue 8am: ME F316 Tut in FD I 1223');
+        assert(tue[1].courseId === 'me_f315' && tue[1].type === 'Lecture' && tue[1].startTime === '11:00' && tue[1].room === 'FD I 1201', 'Tue 11am: ME F315 Lec in FD I 1201');
+        assert(tue[2].courseId === 'me_f314' && tue[2].type === 'Lecture' && tue[2].startTime === '12:00' && tue[2].room === 'LTC 5101', 'Tue 12pm: ME F314 Lec in LTC 5101');
+        assert(tue[3].courseId === 'me_f315' && tue[3].type.includes('Lab') && tue[3].startTime === '14:00' && tue[3].endTime === '15:50' && tue[3].room === 'Workshop 7101', 'Tue 2-3:50pm: ME F315 Lab in Workshop 7101');
+        assert(tue[4].courseId === 'me_f317' && tue[4].type === 'Tutorial' && tue[4].startTime === '16:00' && tue[4].room === 'FD I 1202', 'Tue 4pm: ME F317 Tut in FD I 1202');
+
+        // Wednesday: 6 classes
+        const wed = WEEKLY_SCHEDULE[3];
+        assert(wed.length === 6, 'Wednesday has 6 scheduled classes');
+        assert(wed[0].courseId === 'me_f315' && wed[0].type === 'Tutorial' && wed[0].startTime === '08:00' && wed[0].room === 'FD I 1201', 'Wed 8am: ME F315 Tut in FD I 1201');
+        assert(wed[1].courseId === 'me_f316' && wed[1].type === 'Lecture' && wed[1].startTime === '09:00' && wed[1].room === 'LTC 5106', 'Wed 9am: ME F316 Lec in LTC 5106');
+        assert(wed[2].courseId === 'me_f317' && wed[2].type === 'Lecture' && wed[2].startTime === '10:00' && wed[2].room === 'FD I 1201', 'Wed 10am: ME F317 Lec in FD I 1201');
+        assert(wed[3].courseId === 'bio_f421' && wed[3].type === 'Lecture' && wed[3].startTime === '14:00' && wed[3].room === 'NAB 6158', 'Wed 2pm: BIO F421 Lec in NAB 6158');
+        assert(wed[4].courseId === 'bits_f462' && wed[4].type === 'Lecture' && wed[4].startTime === '15:00' && wed[4].room === 'FD I 1231', 'Wed 3pm: BITS F462 Lec in FD I 1231');
+        assert(wed[5].courseId === 'me_f340' && wed[5].type === 'Lecture' && wed[5].startTime === '16:00' && wed[5].room === 'FD I 1202', 'Wed 4pm: ME F340 Lec in FD I 1202');
+
+        // Thursday: 3 classes
+        const thu = WEEKLY_SCHEDULE[4];
+        assert(thu.length === 3, 'Thursday has 3 scheduled classes');
+        assert(thu[0].courseId === 'me_f315' && thu[0].type === 'Lecture' && thu[0].startTime === '11:00' && thu[0].room === 'FD I 1201', 'Thu 11am: ME F315 Lec in FD I 1201');
+        assert(thu[1].courseId === 'me_f314' && thu[1].type === 'Lecture' && thu[1].startTime === '12:00' && thu[1].room === 'LTC 5101', 'Thu 12pm: ME F314 Lec in LTC 5101');
+        assert(thu[2].courseId === 'bits_f468' && thu[2].type === 'Lecture' && thu[2].startTime === '18:00' && thu[2].endTime === '19:50' && thu[2].room === 'LTC 5103', 'Thu 6-7:50pm: BITS F468 Lec in LTC 5103');
+
+        // Friday: 4 classes
+        const fri = WEEKLY_SCHEDULE[5];
+        assert(fri.length === 4, 'Friday has 4 scheduled classes');
+        assert(fri[0].courseId === 'me_f314' && fri[0].type === 'Lecture' && fri[0].startTime === '12:00' && fri[0].room === 'LTC 5101', 'Fri 12pm: ME F314 Lec in LTC 5101');
+        assert(fri[1].courseId === 'bio_f421' && fri[1].type === 'Lecture' && fri[1].startTime === '14:00' && fri[1].room === 'NAB 6158', 'Fri 2pm: BIO F421 Lec in NAB 6158');
+        assert(fri[2].courseId === 'bits_f462' && fri[2].type === 'Lecture' && fri[2].startTime === '15:00' && fri[2].room === 'FD I 1231', 'Fri 3pm: BITS F462 Lec in FD I 1231');
+        assert(fri[3].courseId === 'me_f340' && fri[3].type === 'Lecture' && fri[3].startTime === '16:00' && fri[3].room === 'FD I 1202', 'Fri 4pm: ME F340 Lec in FD I 1202');
+
+        // Saturday & Sunday: Free
+        assert(WEEKLY_SCHEDULE[6].length === 0, 'Saturday is free day (0 classes)');
+        assert(WEEKLY_SCHEDULE[0].length === 0, 'Sunday is free day (0 classes)');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 3: ATTENDANCE LOGGING & STATE TOGGLE
+        // -------------------------------------------------------------
+        TimetableEngine.resetAllAttendance();
+        const testDate = '2026-09-17';
+        const testSlot = 'mon_0800_me314_tut';
+
+        // Mark Present
+        let res = TimetableEngine.markAttendance(testDate, testSlot, 'present');
+        assert(res.status === 'present', 'Slot marked present');
+
+        // Toggle Present again -> should unmark
+        let resToggle = TimetableEngine.markAttendance(testDate, testSlot, 'present');
+        assert(resToggle.status === 'unmarked', 'Tapping same status toggles to unmarked');
+
+        // Mark Absent
+        res = TimetableEngine.markAttendance(testDate, testSlot, 'absent');
+        assert(res.status === 'absent', 'Slot marked absent');
+
+        // Mark Cancelled
+        res = TimetableEngine.markAttendance(testDate, testSlot, 'cancelled');
+        assert(res.status === 'cancelled', 'Slot marked cancelled');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 4: 75% ATTENDANCE ANALYTICS & MATH
+        // -------------------------------------------------------------
+        TimetableEngine.resetAllAttendance();
+        // Setup 3 classes for ME F314: 2 attended, 1 absent -> total held = 3, attendance = 66.7%
+        TimetableEngine.markAttendance('2026-09-01', 'mon_0800_me314_tut', 'present');
+        TimetableEngine.markAttendance('2026-09-02', 'tue_1200_me314_lec', 'present');
+        TimetableEngine.markAttendance('2026-09-03', 'thu_1200_me314_lec', 'absent');
+
+        let stats = TimetableEngine.getSubjectAttendance('me_f314');
+        assert(stats.attended === 2, 'Attended count is 2');
+        assert(stats.absent === 1, 'Absent count is 1');
+        assert(stats.totalHeld === 3, 'Total held is 3');
+        assert(stats.percentage === 66.7, 'Percentage is 66.7%');
+        assert(stats.isLowAttendance === true, 'Low attendance flag is true (<75%)');
+        assert(stats.mustAttend === 1, 'Must attend 1 class to recover to 75% (3*1 - 2 = 1)');
+        assert(stats.safeToBunk === 0, 'Safe to bunk is 0 when below 75%');
+
+        // Now attend 1 more class -> 3 attended out of 4 held -> 75.0%
+        TimetableEngine.markAttendance('2026-09-04', 'fri_1200_me314_lec', 'present');
+        stats = TimetableEngine.getSubjectAttendance('me_f314');
+        assert(stats.totalHeld === 4, 'Total held is 4');
+        assert(stats.percentage === 75.0, 'Percentage is exactly 75.0%');
+        assert(stats.isLowAttendance === false, 'Low attendance flag is false');
+        assert(stats.mustAttend === 0, 'Must attend is 0 when >= 75%');
+        assert(stats.safeToBunk === 0, 'Safe to bunk is 0 at exact 75% (floor(3/0.75)-4 = 0)');
+
+        // Now attend 6 more classes -> 9 attended, 1 absent -> held = 10 -> 90%
+        for (let i = 5; i <= 10; i++) {
+          TimetableEngine.markAttendance(`2026-09-${String(i).padStart(2, '0')}`, 'mon_0800_me314_tut', 'present');
+        }
+        stats = TimetableEngine.getSubjectAttendance('me_f314');
+        assert(stats.attended === 9 && stats.totalHeld === 10, 'Attended 9 / Held 10');
+        assert(stats.percentage === 90.0, 'Percentage is 90%');
+        assert(stats.safeToBunk === 2, 'Safe to bunk is 2 classes (floor(9/0.75) - 10 = 12 - 10 = 2)');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 5: CLASS NOTES
+        // -------------------------------------------------------------
+        TimetableEngine.saveClassNote('2026-09-17', 'mon_0800_me314_tut', '📐 [Formula]: sigma = M*y/I');
+        const retrievedNote = TimetableEngine.getClassNote('2026-09-17', 'mon_0800_me314_tut');
+        assert(retrievedNote.includes('sigma = M*y/I'), 'Class note saved and retrieved');
+
+        // -------------------------------------------------------------
+        // TEST SUITE 6: UI COMPONENT MOUNT & INTERACTION
+        // -------------------------------------------------------------
+        const mountContainer = document.getElementById('mountTestContainer');
+        const uiComp = new TimetableUIComponent(mountContainer);
+        uiComp.init();
+
+        assert(!!mountContainer.querySelector('.tt-root'), 'UI Component root rendered in DOM');
+        assert(!!mountContainer.querySelector('#ttDaySelector'), 'Day pill selector rendered');
+        assert(mountContainer.querySelectorAll('.tt-day-pill').length === 7, '7 day pills rendered (Mon-Sun)');
+        assert(!!mountContainer.querySelector('.tt-analytics-card'), '75% Attendance Analytics card rendered');
+        assert(!!mountContainer.querySelector('.tt-classes-list') || !!mountContainer.querySelector('.tt-weekend-card'), 'Classes list or weekend card rendered');
+
+        // Switch to Friday
+        uiComp.setDay(5);
+        assert(mountContainer.querySelectorAll('.tt-class-card').length === 4, 'Friday renders exactly 4 class cards');
+
+        // Switch to Sunday
+        uiComp.setDay(0);
+        assert(!!mountContainer.querySelector('.tt-weekend-card'), 'Sunday renders weekend celebration card');
+
+        // Switch to Monday
+        uiComp.setDay(1);
+        assert(mountContainer.querySelectorAll('.tt-class-card').length === 6, 'Monday renders exactly 6 class cards');
+
+        // Summary update
+        summaryContainer.innerHTML = `🎉 ALL ${passCount} TESTS PASSED! (${failCount} failures)`;
+        summaryContainer.style.color = '#10b981';
+
+      } catch (err) {
+        console.error('Test execution error:', err);
+        summaryContainer.innerHTML = `❌ TEST SUITE FAILED: ${err.message}`;
+        summaryContainer.style.color = '#ef4444';
+      }
+    }
+
+    runTests();
+  </script>
+</body>
+</html>
